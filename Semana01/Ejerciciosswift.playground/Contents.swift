@@ -38,5 +38,25 @@ let totalfinal = total + igvtotal
 //total :montobase + igv
 // primer commmit
 //mostrar los datos
+// mostrar los datos
+
+print("")
+print("========================================")
+print("              FACTURA")
+print("========================================")
+print("Producto       : \(producto)")
+print("Precio unitario: S/ \(String(format: "%.2f", precio))")
+print("Cantidad       : \(cantidad)")
+print("----------------------------------------")
+print("Subtotal       : S/ \(String(format: "%.2f", subtotal))")
+print("Descuento      : S/ \(String(format: "%.2f", descuento))")
+print("Monto base     : S/ \(String(format: "%.2f", total))")
+print("IGV (18%)      : S/ \(String(format: "%.2f", igvtotal))")
+print("----------------------------------------")
+print("TOTAL A PAGAR  : S/ \(String(format: "%.2f", totalfinal))")
+print("========================================")
+print("        Gracias por su compra")
+print("========================================")
+
 //segundo commit
 
