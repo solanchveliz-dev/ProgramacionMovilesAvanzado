@@ -74,6 +74,47 @@ if meses > 0 {
         print("Monto del interés: S/ \(montoInteres)")
         print("Monto final: S/ \(montoFinal)")
         print("Cuota mensual: S/ \(cuotaMensual)")
+    
+    
+        print("-------------------------")
+        print("¿Desea realizar un adelanto de pago? (SI/NO)")
+
+    let respuestaAdelanto = readLine() ?? ""
+
+    var mesAdelanto = 0
+    var montoAdicional = 0.0
+
+    if respuestaAdelanto.uppercased() == "SI" {
+
+        print("¿En qué mes realizará el adelanto?")
+        mesAdelanto = Int(readLine() ?? "") ?? 0
+
+        if mesAdelanto > 0 && mesAdelanto <= meses {
+
+            print("Ingrese el monto adicional:")
+            montoAdicional = Double(readLine() ?? "") ?? 0
+
+            if montoAdicional > 0 {
+                print("-------------------------")
+                print("Mes del adelanto: \(mesAdelanto)")
+                print("Monto adicional: S/ \(montoAdicional)")
+            } else {
+                print("El monto adicional debe ser mayor que 0")
+            }
+
+        } else {
+            print("El mes del adelanto no es válido")
+        }
+
+    } else if respuestaAdelanto.uppercased() == "NO" {
+
+        print("No se realizará adelanto de pago")
+
+    } else{
+
+        print("Debe ingresar SI o NO")
+    }
+    
         
         
         print("-------------------------")
