@@ -56,16 +56,55 @@ if meses > 0 {
     let montoInteres = montoCompra * interes
     let montoFinal = montoCompra + montoInteres
     let cuotaMensual = montoFinal / Double(meses)
+    
+    print("-------------------------")
+    print("PLAN DE PAGO")
+    print("Meses: \(meses)")
+    print("Interés: \(interes * 100)%")
+    print("Monto de compra: S/ \(montoCompra)")
+    print("Monto del interés: S/ \(montoInteres)")
+    print("Monto final: S/ \(montoFinal)")
+    print("Cuota mensual: S/ \(cuotaMensual)")
+    
+    
+    print("-------------------------")
+    print("CALENDARIO DE PAGOS")
+    print("-------------------------")
+    
+    var saldoRestante = montoFinal
+    
+    let calendario = Calendar.current
+    let fechaActual = Date()
+    
+    let formatoFecha = DateFormatter()
+    formatoFecha.dateFormat = "dd/MM/yyyy"
+    
+    for mes in 1...meses {
         
+        let fechaPago = calendario.date(
+            byAdding: .month,
+            value: mes,
+            to: fechaActual
+        )!
+        
+        let montoInicial = saldoRestante
+        
+        var pago = cuotaMensual
+        
+        if pago > saldoRestante {
+            pago = saldoRestante
+        }
+        
+        saldoRestante = saldoRestante - pago
+        
+        print("Mes: \(mes)")
+        print("Fecha: \(formatoFecha.string(from: fechaPago))")
+        print("Monto inicial: S/ \(String(format: "%.2f", montoInicial))")
+        print("Pago: S/ \(String(format: "%.2f", pago))")
+        print("Resta por pagar: S/ \(String(format: "%.2f", saldoRestante))")
         print("-------------------------")
-        print("PLAN DE PAGO")
-        print("Meses: \(meses)")
-        print("Interés: \(interes * 100)%")
-        print("Monto de compra: S/ \(montoCompra)")
-        print("Monto del interés: S/ \(montoInteres)")
-        print("Monto final: S/ \(montoFinal)")
-        print("Cuota mensual: S/ \(cuotaMensual)")
     }
+}
 
     
 
