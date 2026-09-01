@@ -68,13 +68,10 @@ if meses > 0 {
     
     print("-------------------------")
     print("PLAN DE PAGO")
-    print("Meses: \(meses)")
-    print("Interés: \(interes * 100)%")
-    print("Monto de compra: S/ \(montoCompra)")
-    print("Monto del interés: S/ \(montoInteres)")
-    print("Monto final: S/ \(montoFinal)")
-    print("Cuota mensual: S/ \(cuotaMensual)")
-    
+    print("Monto de compra: S/ \(String(format: "%.2f", montoCompra))")
+    print("Monto del interés: S/ \(String(format: "%.2f", montoInteres))")
+    print("Monto final: S/ \(String(format: "%.2f", montoFinal))")
+    print("Cuota mensual: S/ \(String(format: "%.2f", cuotaMensual))")
     
     print("-------------------------")
     print("¿Desea realizar un adelanto de pago? (SI/NO)")
@@ -89,23 +86,28 @@ if meses > 0 {
         print("¿En qué mes realizará el adelanto?")
         mesAdelanto = Int(readLine() ?? "") ?? 0
         
-        if mesAdelanto > 0 && mesAdelanto <= meses {
-            
+       while mesAdelanto < 1 || mesAdelanto > meses {
+                   print("Mes no válido")
+                   print("Debe ingresar un mes entre 1 y \(meses)")
+                   print("Ingrese nuevamente el mes:")
+
+                   mesAdelanto = Int(readLine() ?? "0") ?? 0
+               }
             print("Ingrese el monto adicional:")
-            montoAdicional = Double(readLine() ?? "") ?? 0
+               montoAdicional = Double(readLine() ?? "0") ?? 0
+
+               while montoAdicional <= 0 {
+                   print("Monto no válido")
+                   print("El monto debe ser mayor que S/ 0.00")
+                   print("Ingrese nuevamente el monto adicional:")
+
+                   montoAdicional = Double(readLine() ?? "0") ?? 0
+               }
+
+               print("-------------------------")
+               print("Mes del adelanto: \(mesAdelanto)")
+               print("Monto adicional: S/ \(String(format: "%.2f", montoAdicional))")
             
-            if montoAdicional > 0 {
-                print("-------------------------")
-                print("Mes del adelanto: \(mesAdelanto)")
-                print("Monto adicional: S/ \(montoAdicional)")
-            } else {
-                print("El monto adicional debe ser mayor que 0")
-            }
-            
-        } else {
-            print("El mes del adelanto no es válido")
-        }
-        
     } else if respuestaAdelanto.uppercased() == "NO" {
         
         print("No se realizará adelanto de pago")
@@ -128,8 +130,16 @@ if meses > 0 {
     
     let formatoFecha = DateFormatter()
     formatoFecha.dateFormat = "dd/MM/yyyy"
+    var mesesPagados = 0
+    
+    print("Mes | Fecha       | Monto inicial | Adelanto    | Pago total   | Resta por pagar")
+    print("-------------------------------------------------------------------------------")
     
     for mes in 1...meses {
+        
+        if saldoRestante <= 0 {
+            break
+        }
         
         let fechaPago = calendario.date(
             byAdding: .month,
@@ -151,17 +161,36 @@ if meses > 0 {
         
         saldoRestante = saldoRestante - pago
         
-        print("Mes: \(mes)")
-        print("Fecha: \(formatoFecha.string(from: fechaPago))")
-        print("Monto inicial: S/ \(String(format: "%.2f", montoInicial))")
+        mesesPagados = mesesPagados + 1
+        
+        let fechaTexto = formatoFecha.string(from: fechaPago)
+        
+        var adelantoTexto = "S/ 0.00"
         
         if mes == mesAdelanto && montoAdicional > 0 {
-            print("Pago adelantado: S/ \(String(format: "%.2f", montoAdicional))")
+            adelantoTexto = String(format: "S/ %.2f", montoAdicional)
         }
         
-        print("Pago total del mes: S/ \(String(format: "%.2f", pago))")
-        print("Resta por pagar: S/ \(String(format: "%.2f", saldoRestante))")
-        print("-------------------------")
+        let montoInicialTexto = String(format: "S/ %.2f", montoInicial)
+        let pagoTexto = String(format: "S/ %.2f", pago)
+        let saldoTexto = String(format: "S/ %.2f", saldoRestante)
+        
+        print(
+            "\(mes) | \(fechaTexto) | \(montoInicialTexto) | \(adelantoTexto) | \(pagoTexto) | \(saldoTexto)"
+        )
+        
+    }
+    print("-------------------------")
+    print("RESUMEN FINAL")
+    print("-------------------------")
+    print("Meses del plan original: \(meses)")
+    print("Meses realmente pagados: \(mesesPagados)")
+    print("Saldo final: S/ \(String(format: "%.2f", saldoRestante))")
+
+    if mesesPagados < meses {
+        print("Gracias al adelanto terminó de pagar antes.")
+    } else {
+        print("El plan se completó en los meses establecidos.")
     }
 }
 
