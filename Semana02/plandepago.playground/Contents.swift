@@ -1,6 +1,6 @@
 import Foundation
 
-print("PLAN DE PAGO")
+print("DATOS DEL PRODUCTO")
 print("-------------------------")
 
 print("Ingrese el nombre del producto:")
@@ -43,3 +43,29 @@ if meses > 0 {
     print("-------------------------")
     print("Plan seleccionado: \(meses) meses")
 }
+if meses > 0 {
+    var interes = 0.0
+    
+    if meses == 6 {
+        interes = 0.20
+    } else if meses == 12 {
+        interes == 0.40
+    } else if meses == 24 {
+        interes == 0.60
+    }
+    let montoInteres = montoCompra * interes
+    let montoFinal = montoCompra + montoInteres
+    let cuotaMensual = montoFinal / Double(meses)
+        
+        print("-------------------------")
+        print("PLAN DE PAGO")
+        print("Meses: \(meses)")
+        print("Interés: \(interes * 100)%")
+        print("Monto de compra: S/ \(montoCompra)")
+        print("Monto del interés: S/ \(montoInteres)")
+        print("Monto final: S/ \(montoFinal)")
+        print("Cuota mensual: S/ \(cuotaMensual)")
+    }
+
+    
+
