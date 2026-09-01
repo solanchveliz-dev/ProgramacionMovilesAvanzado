@@ -49,51 +49,51 @@ if  let opcion = Int(entrada) {
 
 
 if meses > 0 {
-        print("-------------------------")
-        print("Plan seleccionado: \(meses) meses")
+    print("-------------------------")
+    print("Plan seleccionado: \(meses) meses")
     
     
-        var interes = 0.0
-        
-        if meses == 6 {
-            interes = 0.20
-        } else if meses == 12 {
-            interes = 0.40
-        } else if meses == 24 {
-            interes = 0.60
-        }
-        let montoInteres = montoCompra * interes
-        let montoFinal = montoCompra + montoInteres
-        let cuotaMensual = montoFinal / Double(meses)
-        
-        print("-------------------------")
-        print("PLAN DE PAGO")
-        print("Meses: \(meses)")
-        print("Interés: \(interes * 100)%")
-        print("Monto de compra: S/ \(montoCompra)")
-        print("Monto del interés: S/ \(montoInteres)")
-        print("Monto final: S/ \(montoFinal)")
-        print("Cuota mensual: S/ \(cuotaMensual)")
+    var interes = 0.0
+    
+    if meses == 6 {
+        interes = 0.20
+    } else if meses == 12 {
+        interes = 0.40
+    } else if meses == 24 {
+        interes = 0.60
+    }
+    let montoInteres = montoCompra * interes
+    let montoFinal = montoCompra + montoInteres
+    let cuotaMensual = montoFinal / Double(meses)
+    
+    print("-------------------------")
+    print("PLAN DE PAGO")
+    print("Meses: \(meses)")
+    print("Interés: \(interes * 100)%")
+    print("Monto de compra: S/ \(montoCompra)")
+    print("Monto del interés: S/ \(montoInteres)")
+    print("Monto final: S/ \(montoFinal)")
+    print("Cuota mensual: S/ \(cuotaMensual)")
     
     
-        print("-------------------------")
-        print("¿Desea realizar un adelanto de pago? (SI/NO)")
-
+    print("-------------------------")
+    print("¿Desea realizar un adelanto de pago? (SI/NO)")
+    
     let respuestaAdelanto = readLine() ?? ""
-
+    
     var mesAdelanto = 0
     var montoAdicional = 0.0
-
+    
     if respuestaAdelanto.uppercased() == "SI" {
-
+        
         print("¿En qué mes realizará el adelanto?")
         mesAdelanto = Int(readLine() ?? "") ?? 0
-
+        
         if mesAdelanto > 0 && mesAdelanto <= meses {
-
+            
             print("Ingrese el monto adicional:")
             montoAdicional = Double(readLine() ?? "") ?? 0
-
+            
             if montoAdicional > 0 {
                 print("-------------------------")
                 print("Mes del adelanto: \(mesAdelanto)")
@@ -101,61 +101,69 @@ if meses > 0 {
             } else {
                 print("El monto adicional debe ser mayor que 0")
             }
-
+            
         } else {
             print("El mes del adelanto no es válido")
         }
-
+        
     } else if respuestaAdelanto.uppercased() == "NO" {
-
+        
         print("No se realizará adelanto de pago")
-
+        
     } else{
-
+        
         print("Debe ingresar SI o NO")
     }
     
+    
+    
+    print("-------------------------")
+    print("CALENDARIO DE PAGOS")
+    print("-------------------------")
+    
+    var saldoRestante = montoFinal
+    
+    let calendario = Calendar.current
+    let fechaActual = Date()
+    
+    let formatoFecha = DateFormatter()
+    formatoFecha.dateFormat = "dd/MM/yyyy"
+    
+    for mes in 1...meses {
         
+        let fechaPago = calendario.date(
+            byAdding: .month,
+            value: mes,
+            to: fechaActual
+        )!
         
-        print("-------------------------")
-        print("CALENDARIO DE PAGOS")
-        print("-------------------------")
+        let montoInicial = saldoRestante
         
-        var saldoRestante = montoFinal
+        var pago = cuotaMensual
         
-        let calendario = Calendar.current
-        let fechaActual = Date()
-        
-        let formatoFecha = DateFormatter()
-        formatoFecha.dateFormat = "dd/MM/yyyy"
-        
-        for mes in 1...meses {
-            
-            let fechaPago = calendario.date(
-                byAdding: .month,
-                value: mes,
-                to: fechaActual
-            )!
-            
-            let montoInicial = saldoRestante
-            
-            var pago = cuotaMensual
-            
-            if pago > saldoRestante {
-                pago = saldoRestante
-            }
-            
-            saldoRestante = saldoRestante - pago
-            
-            print("Mes: \(mes)")
-            print("Fecha: \(formatoFecha.string(from: fechaPago))")
-            print("Monto inicial: S/ \(String(format: "%.2f", montoInicial))")
-            print("Pago: S/ \(String(format: "%.2f", pago))")
-            print("Resta por pagar: S/ \(String(format: "%.2f", saldoRestante))")
-            print("-------------------------")
+        if mes == mesAdelanto {
+            pago = pago + montoAdicional
         }
         
+        if pago > saldoRestante {
+            pago = saldoRestante
+        }
+        
+        saldoRestante = saldoRestante - pago
+        
+        print("Mes: \(mes)")
+        print("Fecha: \(formatoFecha.string(from: fechaPago))")
+        print("Monto inicial: S/ \(String(format: "%.2f", montoInicial))")
+        
+        if mes == mesAdelanto && montoAdicional > 0 {
+            print("Pago adelantado: S/ \(String(format: "%.2f", montoAdicional))")
+        }
+        
+        print("Pago total del mes: S/ \(String(format: "%.2f", pago))")
+        print("Resta por pagar: S/ \(String(format: "%.2f", saldoRestante))")
+        print("-------------------------")
     }
+}
 
 
     
