@@ -311,36 +311,43 @@ var stocksInventario: [String: Int] = [:]
 print("¿Cuántos productos?")
 let cantidadProductos = Int(readLine() ?? "") ?? 0
 
-for i in 1...cantidadProductos {
-    print("Producto \(i) - Nombre:")
-    let nombreProductoInv = readLine() ?? ""
+if cantidadProductos > 0 {
 
-    print("Precio:")
-    let precioProductoInv = Double(readLine() ?? "") ?? 0
+    for i in 1...cantidadProductos {
 
-    print("Stock:")
-    let stockProductoInv = Int(readLine() ?? "") ?? 0
+        print("Producto \(i) - Nombre:")
+        let nombreProductoInv = readLine() ?? ""
 
-    preciosInventario[nombreProductoInv] = precioProductoInv
-    stocksInventario[nombreProductoInv] = stockProductoInv
-}
+        print("Precio:")
+        let precioProductoInv = Double(readLine() ?? "") ?? 0
 
-// Calcular valor total del inventario
-var valorInventario = 0.0
+        print("Stock:")
+        let stockProductoInv = Int(readLine() ?? "") ?? 0
 
-for (nombreProductoInv, precioProductoInv) in preciosInventario {
-    if let stockProductoInv = stocksInventario[nombreProductoInv] {
-        valorInventario += precioProductoInv * Double(stockProductoInv)
+        preciosInventario[nombreProductoInv] = precioProductoInv
+        stocksInventario[nombreProductoInv] = stockProductoInv
     }
-}
 
-print("Valor total del inventario: S/. \(valorInventario)")
+    var valorInventario = 0.0
 
-// Mostrar productos con stock bajo
-print("===== STOCK BAJO =====")
+    for (nombreProductoInv, precioProductoInv) in preciosInventario {
 
-for (nombreProductoInv, stockProductoInv) in stocksInventario {
-    if stockProductoInv < 5 {
-        print("\(nombreProductoInv): \(stockProductoInv) unidades")
+        if let stockProductoInv = stocksInventario[nombreProductoInv] {
+            valorInventario += precioProductoInv * Double(stockProductoInv)
+        }
     }
+
+    print("Valor total del inventario: S/. \(valorInventario)")
+
+    print("===== STOCK BAJO =====")
+
+    for (nombreProductoInv, stockProductoInv) in stocksInventario {
+
+        if stockProductoInv < 5 {
+            print("\(nombreProductoInv): \(stockProductoInv) unidades")
+        }
+    }
+
+} else {
+    print("Debe ingresar una cantidad mayor a 0")
 }
