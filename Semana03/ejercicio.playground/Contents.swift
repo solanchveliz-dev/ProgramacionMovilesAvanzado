@@ -255,3 +255,92 @@ print(a.subtracting(b))
 
 var repetidos: Set = ["A", "B", "A", "C", "B"]
 print(repetidos.count)
+
+// ===== EJERCICIO 4: COMBINACIÓN DE COLECCIONES =====
+// Ejemplo resuelto: Sistema de notas
+
+var notasPa: [String: Double] = [:]
+var notasPb: [String: Double] = [:]
+
+print("¿Cuántos alumnos?")
+let cantidadAlumnos = Int(readLine() ?? "") ?? 0
+
+for i in 1...cantidadAlumnos {
+    print("\nAlumno \(i) - Nombre:")
+    let nombreAlumno = readLine() ?? ""
+
+    print("Nota Pa:")
+    let pa = Double(readLine() ?? "") ?? 0
+
+    print("Nota Pb:")
+    let pb = Double(readLine() ?? "") ?? 0
+
+    notasPa[nombreAlumno] = pa
+    notasPb[nombreAlumno] = pb
+}
+
+print("\n===== REPORTE =====")
+
+var totalAprobados = 0
+var sumaGeneral = 0.0
+
+for (alumno, pa) in notasPa {
+    if let pb = notasPb[alumno] {
+
+        let notaFinal = 0.30 * pa + 0.70 * pb
+        let estado = notaFinal >= 13.0 ? "Aprobado" : "Desaprobado"
+
+        print("\(alumno): Pa=\(pa) Pb=\(pb) Final=\(notaFinal) → \(estado)")
+
+        sumaGeneral += notaFinal
+
+        if notaFinal >= 13.0 {
+            totalAprobados += 1
+        }
+    }
+}
+
+print("Promedio general: \(sumaGeneral / Double(notasPa.count))")
+print("Aprobados: \(totalAprobados) de \(notasPa.count)")
+
+// ===== TODO 10: Inventario de productos =====
+
+var preciosInventario: [String: Double] = [:]
+var stocksInventario: [String: Int] = [:]
+
+print("¿Cuántos productos?")
+let cantidadProductos = Int(readLine() ?? "") ?? 0
+
+for i in 1...cantidadProductos {
+    print("Producto \(i) - Nombre:")
+    let nombreProductoInv = readLine() ?? ""
+
+    print("Precio:")
+    let precioProductoInv = Double(readLine() ?? "") ?? 0
+
+    print("Stock:")
+    let stockProductoInv = Int(readLine() ?? "") ?? 0
+
+    preciosInventario[nombreProductoInv] = precioProductoInv
+    stocksInventario[nombreProductoInv] = stockProductoInv
+}
+
+// Calcular valor total del inventario
+var valorInventario = 0.0
+
+for (nombreProductoInv, precioProductoInv) in preciosInventario {
+    if let stockProductoInv = stocksInventario[nombreProductoInv] {
+        valorInventario += precioProductoInv * Double(stockProductoInv)
+    }
+}
+
+print("Valor total del inventario: S/. \(valorInventario)")
+
+// Mostrar productos con stock bajo
+print("===== STOCK BAJO =====")
+
+for (nombreProductoInv, stockProductoInv) in stocksInventario {
+    if stockProductoInv < 5 {
+        print("\(nombreProductoInv): \(stockProductoInv) unidades")
+    }
+}
