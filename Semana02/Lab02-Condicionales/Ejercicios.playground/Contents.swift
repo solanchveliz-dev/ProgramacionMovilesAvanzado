@@ -161,3 +161,104 @@ if precio1 < 0 || precio2 < 0 || precio3 < 0 || precio4 < 0 || precio5 < 0 ||
     // Muestra la cantidad de puntos de fidelidad ganados por el cliente.
     print("Puntos ganados: \(puntos)")
 }
+import Foundation // Importa herramientas básicas disponibles en Swift.
+
+// Guarda el número que el jugador debe adivinar.
+let numeroSecreto = 42
+
+// Guarda el valor correspondiente al primer intento.
+let intento1 = 20
+
+// Guarda el valor correspondiente al segundo intento.
+let intento2 = 50
+
+// Guarda el valor correspondiente al tercer intento.
+let intento3 = 35
+
+// Guarda el valor correspondiente al cuarto intento.
+let intento4 = 42
+
+// Guarda el valor correspondiente al quinto intento.
+let intento5 = 60
+
+// Guarda cuál intento se está evaluando actualmente, comenzando desde el primero.
+var numeroIntento = 1
+
+// Guarda si el jugador ya logró adivinar el número secreto.
+var adivino = false
+
+// Repite el proceso mientras todavía existan intentos y el jugador no haya adivinado.
+while numeroIntento <= 5 && adivino == false {
+
+    // Guarda temporalmente el número correspondiente al intento que se está evaluando.
+    var intentoActual = 0
+
+    // Comprueba si estamos evaluando el primer intento.
+    if numeroIntento == 1 {
+
+        // Asigna el valor del primer intento a la variable que será comparada.
+        intentoActual = intento1
+
+    // Comprueba si estamos evaluando el segundo intento.
+    } else if numeroIntento == 2 {
+
+        // Asigna el valor del segundo intento a la variable que será comparada.
+        intentoActual = intento2
+
+    // Comprueba si estamos evaluando el tercer intento.
+    } else if numeroIntento == 3 {
+
+        // Asigna el valor del tercer intento a la variable que será comparada.
+        intentoActual = intento3
+
+    // Comprueba si estamos evaluando el cuarto intento.
+    } else if numeroIntento == 4 {
+
+        // Asigna el valor del cuarto intento a la variable que será comparada.
+        intentoActual = intento4
+
+    // Si no fue ninguno de los anteriores, corresponde al quinto intento.
+    } else {
+
+        // Asigna el valor del quinto intento a la variable que será comparada.
+        intentoActual = intento5
+    }
+
+    // Muestra el número de intento y el valor que se está probando.
+    print("Intento \(numeroIntento): \(intentoActual)")
+
+    // Comprueba si el intento es menor que el número secreto.
+    if intentoActual < numeroSecreto {
+
+        // Informa que el valor ingresado está por debajo del número secreto.
+        print("Muy bajo")
+
+    // Comprueba si el intento es mayor que el número secreto.
+    } else if intentoActual > numeroSecreto {
+
+        // Informa que el valor ingresado está por encima del número secreto.
+        print("Muy alto")
+
+    // Si no es menor ni mayor, significa que ambos números son iguales.
+    } else {
+
+        // Informa que el jugador encontró el número secreto.
+        print("¡Correcto!")
+
+        // Cambia la variable a true para indicar que el número ya fue adivinado.
+        adivino = true
+
+        // Muestra cuántos intentos fueron necesarios para encontrar el número.
+        print("Adivinaste en \(numeroIntento) intentos.")
+    }
+
+    // Aumenta en uno el contador para pasar al siguiente intento.
+    numeroIntento += 1
+}
+
+// Comprueba si después del ciclo el jugador nunca logró adivinar.
+if adivino == false {
+
+    // Muestra el mensaje de derrota junto con el número secreto correcto.
+    print("Perdiste. El número era: \(numeroSecreto)")
+}
