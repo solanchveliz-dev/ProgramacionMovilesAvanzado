@@ -351,3 +351,144 @@ if cantidadProductos > 0 {
 } else {
     print("Debe ingresar una cantidad mayor a 0")
 }
+
+// ===== EJERCICIO 5: CARRITO DE COMPRAS 2.0 =====
+
+var nombresCarrito: [String] = []
+var preciosCarrito: [Double] = []
+var cantidadesCarrito: [Int] = []
+
+// ===== TODO 11: Pedir productos =====
+
+print("¿Cuántos productos va a comprar?")
+let totalProductosCarrito = Int(readLine() ?? "") ?? 0
+
+if totalProductosCarrito > 0 {
+
+    for i in 1...totalProductosCarrito {
+
+        print("\nProducto \(i) - Nombre:")
+        let nombreCarrito = readLine() ?? ""
+        nombresCarrito.append(nombreCarrito)
+
+        print("Precio unitario:")
+        let precioCarrito = Double(readLine() ?? "") ?? 0
+        preciosCarrito.append(precioCarrito)
+
+        print("Cantidad:")
+        let cantidadCarrito = Int(readLine() ?? "") ?? 0
+        cantidadesCarrito.append(cantidadCarrito)
+    }
+
+    // ===== TODO 12: Calcular subtotales =====
+
+    var subtotalesCarrito: [Double] = []
+
+    for i in 0..<nombresCarrito.count {
+
+        let subCarrito = preciosCarrito[i] * Double(cantidadesCarrito[i])
+
+        subtotalesCarrito.append(subCarrito)
+    }
+
+    // ===== TODO 13: Total del carrito =====
+
+    var totalCarritoCompra = 0.0
+
+    for subCarrito in subtotalesCarrito {
+
+        totalCarritoCompra += subCarrito
+    }
+
+    // ===== TODO 14: Nombre del cliente =====
+
+    print("\nNombre del cliente:")
+
+    let clienteCarrito = readLine() ?? ""
+
+    // ===== TODO 15: Descuento =====
+
+    var descPctCarrito = 0.0
+
+    if totalCarritoCompra >= 5000 {
+
+        descPctCarrito = 0.15
+
+    } else if totalCarritoCompra >= 2000 {
+
+        descPctCarrito = 0.10
+
+    } else if totalCarritoCompra >= 500 {
+
+        descPctCarrito = 0.05
+    }
+
+    let descuentoCarrito = totalCarritoCompra * descPctCarrito
+
+    let totalConDescCarrito = totalCarritoCompra - descuentoCarrito
+
+    // ===== TODO 16: IGV y total =====
+
+    let igvCarrito = totalConDescCarrito * 0.18
+
+    let totalFinalCarrito = totalConDescCarrito + igvCarrito
+
+    // ===== TODO 17: Categoría =====
+
+    var categoriaCarrito = ""
+
+    switch Int(totalCarritoCompra) {
+
+    case 0..<500:
+        categoriaCarrito = "Regular"
+
+    case 500..<2000:
+        categoriaCarrito = "Frecuente"
+
+    case 2000..<5000:
+        categoriaCarrito = "VIP"
+
+    default:
+        categoriaCarrito = "Premium"
+    }
+
+    // ===== TODO 18: Ticket =====
+
+    let sepCarrito = String(repeating: "=", count: 45)
+
+    print(sepCarrito)
+
+    print(" TICKET DE COMPRA 2.0")
+
+    print(" Cliente: \(clienteCarrito) (\(categoriaCarrito))")
+
+    print(sepCarrito)
+
+    for i in 0..<nombresCarrito.count {
+
+        print("\(nombresCarrito[i]) x\(cantidadesCarrito[i]) S/. \(subtotalesCarrito[i])")
+    }
+
+    print(sepCarrito)
+
+    print("Subtotal: S/. \(totalCarritoCompra)")
+
+    if descPctCarrito > 0 {
+
+        print("Descuento (\(descPctCarrito * 100)%): -S/. \(descuentoCarrito)")
+    }
+
+    print("IGV (18%): S/. \(igvCarrito)")
+
+    print(sepCarrito)
+
+    print("TOTAL: S/. \(totalFinalCarrito)")
+
+    print(sepCarrito)
+
+    print("¡Gracias por su compra, \(clienteCarrito)!")
+
+} else {
+
+    print("Debe ingresar una cantidad mayor a 0")
+}
