@@ -1,7 +1,7 @@
 import Foundation
 
 // METROGUÍA LIMA
-// COMMIT 1: Registro, búsqueda y exploración de líneas y estaciones.
+// COMMIT 3: Rutas directas y rutas con conexión entre líneas.
 
 let linea1 = [
     "Bayóvar", "Santa Rosa", "San Martín", "San Carlos", "Los Postes",
@@ -49,6 +49,21 @@ let lineas: [String: [String]] = [
     "2": linea2,
     "3": linea3,
     "4": linea4
+]
+
+// Conexiones proyectadas entre las líneas del Metro de Lima y Callao.
+// Se usa un arreglo porque las líneas 2 y 4 tienen dos conexiones posibles.
+let conexiones: [String: [String]] = [
+    "1-3": ["Cabitos"],
+    "3-1": ["Cabitos"],
+    "1-4": ["La Cultura"],
+    "4-1": ["La Cultura"],
+    "2-3": ["Estación Central"],
+    "3-2": ["Estación Central"],
+    "2-4": ["Carmen de la Legua", "Mercado Santa Anita"],
+    "4-2": ["Carmen de la Legua", "Mercado Santa Anita"],
+    "3-4": ["Conde de San Isidro"],
+    "4-3": ["Conde de San Isidro"]
 ]
 
 func normalizarTexto(_ texto: String) -> String {
@@ -145,19 +160,19 @@ func buscarEstacion() {
     print("          BUSCAR ESTACIÓN")
     print("================================")
     print("Escribe el nombre de la estación:")
-    
+
     let nombreIngresado = readLine() ?? ""
-    
+
     if let nombreCorrecto = obtenerNombreCorrecto(nombreIngresado) {
         let lineasEncontradas = obtenerLineasDeEstacion(nombreCorrecto)
-        
+
         print("\nEstación encontrada: \(nombreCorrecto)")
-        
+
         if lineasEncontradas.count == 1 {
             print("Pertenece a la Línea \(lineasEncontradas[0]).")
         } else {
             print("Esta estación conecta las siguientes líneas:")
-            
+
             for linea in lineasEncontradas {
                 print("- Línea \(linea)")
             }
@@ -167,98 +182,305 @@ func buscarEstacion() {
         print("Verifica el nombre e intenta nuevamente.")
     }
 }
+
 func buscarLineaCompartida(origen: String, destino: String) -> String? {
-        let lineasOrigen = obtenerLineasDeEstacion(origen)
-        let lineasDestino = obtenerLineasDeEstacion(destino)
+    let lineasOrigen = obtenerLineasDeEstacion(origen)
+    let lineasDestino = obtenerLineasDeEstacion(destino)
 
-        for lineaOrigen in lineasOrigen {
-            if lineasDestino.contains(lineaOrigen) {
-                return lineaOrigen
-            }
+    for lineaOrigen in lineasOrigen {
+        if lineasDestino.contains(lineaOrigen) {
+            return lineaOrigen
         }
+    }
 
+    return nil
+}
+
+func calcularCantidadEstaciones(
+    linea: String,
+    origen: String,
+    destino: String
+) -> Int? {
+    guard let estaciones = lineas[linea],
+          let posicionOrigen = estaciones.firstIndex(of: origen),
+          let posicionDestino = estaciones.firstIndex(of: destino) else {
         return nil
     }
 
+    return abs(posicionDestino - posicionOrigen)
+}
+
+func mostrarTramo(linea: String, origen: String, destino: String) {
+    guard let estaciones = lineas[linea],
+          let posicionOrigen = estaciones.firstIndex(of: origen),
+          let posicionDestino = estaciones.firstIndex(of: destino) else {
+        print("No se pudo mostrar este tramo.")
+        return
+    }
+
+    if posicionOrigen == posicionDestino {
+        print("Ya te encuentras en (origen).")
+        return
+    }
+
+    print("Aborda la Línea \(linea) en \(origen).")
+
+    if posicionOrigen < posicionDestino {
+        print("Toma el tren en dirección a \(estaciones[estaciones.count - 1]).")
+        print("Estaciones de este tramo:")
+
+        for posicion in posicionOrigen...posicionDestino {
+            print("  \(posicion - posicionOrigen + 1). \(estaciones[posicion])")
+        }
+    } else {
+        print("Toma el tren en dirección a \(estaciones[0]).")
+        print("Estaciones de este tramo:")
+
+        var numero = 1
+        for posicion in stride(from: posicionOrigen, through: posicionDestino, by: -1) {
+            print("  \(numero). \(estaciones[posicion])")
+            numero += 1
+        }
+    }
+
+    print("Baja en \(destino).")
+}
+
 func mostrarRutaDirecta(origen: String, destino: String, linea: String) {
-        guard let estaciones = lineas[linea],
-              let posicionOrigen = estaciones.firstIndex(of: origen),
-              let posicionDestino = estaciones.firstIndex(of: destino) else {
-            print("No se pudo calcular la ruta.")
-            return
-        }
+    guard let estaciones = lineas[linea],
+          let posicionOrigen = estaciones.firstIndex(of: origen),
+          let posicionDestino = estaciones.firstIndex(of: destino) else {
+        print("No se pudo calcular la ruta.")
+        return
+    }
 
-        if posicionOrigen == posicionDestino {
-            print("Ya te encuentras en la estación \(origen).")
-            return
-        }
+    if posicionOrigen == posicionDestino {
+        print("Ya te encuentras en la estación \(origen).")
+        return
+    }
 
-        let cantidadEstaciones = abs(posicionDestino - posicionOrigen)
-        let tiempoAproximado = cantidadEstaciones * 2
+    let cantidadEstaciones = abs(posicionDestino - posicionOrigen)
+    let tiempoAproximado = cantidadEstaciones * 2
+
     print("\n================================")
-        print("        RUTA ENTRE ESTACIONES")
+    print("        RUTA ENTRE ESTACIONES")
+    print("================================")
+    print("Origen: \(origen)")
+    print("Destino: \(destino)")
+    print("Línea: Línea \(linea)\n")
+    print("Aborda la Línea \(linea) en \(origen).")
+
+    if posicionOrigen < posicionDestino {
+        print("Sube al tren que va hacia \(estaciones[estaciones.count - 1]).")
+        print("\nEstaciones del recorrido:")
+
+        for posicion in posicionOrigen...posicionDestino {
+            print("\(posicion - posicionOrigen + 1). \(estaciones[posicion])")
+        }
+    } else {
+        print("Sube al tren que va hacia \(estaciones[0]).")
+        print("\nEstaciones del recorrido:")
+
+        var numero = 1
+        for posicion in stride(from: posicionOrigen, through: posicionDestino, by: -1) {
+            print("\(numero). \(estaciones[posicion])")
+            numero += 1
+        }
+    }
+
+    print("\nBaja en \(destino).")
+    print("No necesitas cambiar de línea.")
+    print("Estaciones recorridas: \(cantidadEstaciones)")
+    print("Tiempo aproximado: \(tiempoAproximado) minutos")
+    print("El tiempo puede variar según la espera y el servicio.")
+}
+
+func viajarEntreEstaciones() {
+    print("\n================================")
+    print("     VIAJAR HACIA OTRA ESTACIÓN")
+    print("================================")
+    print("¿En qué estación te encuentras?")
+    let origenIngresado = readLine() ?? ""
+
+    print("¿A qué estación quieres llegar?")
+    let destinoIngresado = readLine() ?? ""
+
+    guard let origen = obtenerNombreCorrecto(origenIngresado) else {
+        print("No se encontró la estación de origen.")
+        return
+    }
+
+    guard let destino = obtenerNombreCorrecto(destinoIngresado) else {
+        print("No se encontró la estación de destino.")
+        return
+    }
+
+    if origen == destino {
+        print("Ya te encuentras en la estación \(origen).")
+    } else if let lineaCompartida = buscarLineaCompartida(origen: origen, destino: destino) {
+        mostrarRutaDirecta(origen: origen, destino: destino, linea: lineaCompartida)
+    } else {
+        let lineasOrigen = obtenerLineasDeEstacion(origen)
+        let lineasDestino = obtenerLineasDeEstacion(destino)
+
+        var mejorLineaOrigen = ""
+        var mejorLineaDestino = ""
+        var mejorLineaIntermedia = ""
+        var mejorConexion = ""
+        var segundaConexion = ""
+        var menorCantidad = Int.max
+
+        for lineaOrigen in lineasOrigen {
+            for lineaDestino in lineasDestino {
+                let clave = "\(lineaOrigen)-\(lineaDestino)"
+
+                if let estacionesConexion = conexiones[clave] {
+                    for estacionConexion in estacionesConexion {
+                        if let primerTramo = calcularCantidadEstaciones(
+                            linea: lineaOrigen,
+                            origen: origen,
+                            destino: estacionConexion
+                        ), let segundoTramo = calcularCantidadEstaciones(
+                            linea: lineaDestino,
+                            origen: estacionConexion,
+                            destino: destino
+                        ) {
+                            let cantidadTotal = primerTramo + segundoTramo
+
+                            if cantidadTotal < menorCantidad {
+                                menorCantidad = cantidadTotal
+                                mejorLineaOrigen = lineaOrigen
+                                mejorLineaDestino = lineaDestino
+                                mejorConexion = estacionConexion
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        // La Línea 1 y la Línea 2 no tienen conexión directa.
+        // En ese caso se busca una ruta usando la Línea 3 o la Línea 4.
+        if mejorConexion.isEmpty {
+            for lineaOrigen in lineasOrigen {
+                for lineaDestino in lineasDestino {
+                    for lineaIntermedia in ["3", "4"] {
+                        let primeraClave = "\(lineaOrigen)-\(lineaIntermedia)"
+                        let segundaClave = "\(lineaIntermedia)-\(lineaDestino)"
+
+                        if let primerasConexiones = conexiones[primeraClave],
+                           let segundasConexiones = conexiones[segundaClave] {
+                            for primeraEstacion in primerasConexiones {
+                                for segundaEstacion in segundasConexiones {
+                                    if let primerTramo = calcularCantidadEstaciones(
+                                        linea: lineaOrigen,
+                                        origen: origen,
+                                        destino: primeraEstacion
+                                    ), let tramoIntermedio = calcularCantidadEstaciones(
+                                        linea: lineaIntermedia,
+                                        origen: primeraEstacion,
+                                        destino: segundaEstacion
+                                    ), let ultimoTramo = calcularCantidadEstaciones(
+                                        linea: lineaDestino,
+                                        origen: segundaEstacion,
+                                        destino: destino
+                                    ) {
+                                        let cantidadTotal = primerTramo
+                                            + tramoIntermedio
+                                            + ultimoTramo
+
+                                        if cantidadTotal < menorCantidad {
+                                            menorCantidad = cantidadTotal
+                                            mejorLineaOrigen = lineaOrigen
+                                            mejorLineaDestino = lineaDestino
+                                            mejorLineaIntermedia = lineaIntermedia
+                                            mejorConexion = primeraEstacion
+                                            segundaConexion = segundaEstacion
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        if mejorConexion.isEmpty {
+            print("No se encontró una conexión para esta ruta.")
+            return
+        }
+
+        var cantidadCambios = 1
+        if !segundaConexion.isEmpty {
+            cantidadCambios = 2
+        }
+
+        let tiempoAproximado = menorCantidad * 2 + cantidadCambios * 5
+
+        print("\n================================")
+        print("       RUTA CON CAMBIO DE LÍNEA")
         print("================================")
         print("Origen: \(origen)")
-        print("Destino: \(destino)")
-        print("Línea: Línea \(linea)\n")
-        print("Aborda la Línea \(linea) en \(origen).")
+        print("Destino: \(destino)\n")
 
-        if posicionOrigen < posicionDestino {
-            print("Sube al tren que va hacia \(estaciones[estaciones.count - 1]).")
-            print("\nEstaciones del recorrido:")
+        print("PRIMER TRAMO")
+        mostrarTramo(
+            linea: mejorLineaOrigen,
+            origen: origen,
+            destino: mejorConexion
+        )
 
-            for posicion in posicionOrigen...posicionDestino {
-                print("\(posicion - posicionOrigen + 1). \(estaciones[posicion])")
-            }
+        print("\nCAMBIO DE LÍNEA")
+        print("En \(mejorConexion), sigue las señales para cambiar")
+
+        if segundaConexion.isEmpty {
+            print("de la Línea \(mejorLineaOrigen) a la Línea \(mejorLineaDestino).")
+
+            print("\nSEGUNDO TRAMO")
+            mostrarTramo(
+                linea: mejorLineaDestino,
+                origen: mejorConexion,
+                destino: destino
+            )
         } else {
-            print("Sube al tren que va hacia \(estaciones[0]).")
-            print("\nEstaciones del recorrido:")
+            print("de la Línea \(mejorLineaOrigen) a la Línea \(mejorLineaIntermedia).")
 
-            var numero = 1
-            for posicion in stride(from: posicionOrigen, through: posicionDestino, by: -1) {
-                print("\(numero). \(estaciones[posicion])")
-                numero += 1
-            }
+            print("\nSEGUNDO TRAMO")
+            mostrarTramo(
+                linea: mejorLineaIntermedia,
+                origen: mejorConexion,
+                destino: segundaConexion
+            )
+
+            print("\nSEGUNDO CAMBIO DE LÍNEA")
+            print("En \(segundaConexion), sigue las señales para cambiar")
+            print("de la Línea \(mejorLineaIntermedia) a la Línea \(mejorLineaDestino).")
+
+            print("\nTERCER TRAMO")
+            mostrarTramo(
+                linea: mejorLineaDestino,
+                origen: segundaConexion,
+                destino: destino
+            )
         }
 
-        print("\nBaja en \(destino).")
-        print("No necesitas cambiar de línea.")
-        print("Estaciones recorridas: \(cantidadEstaciones)")
+        print("\nRESUMEN DEL VIAJE")
+        if segundaConexion.isEmpty {
+            print("Cambio de línea: \(mejorConexion)")
+        } else {
+            print("Cambios de línea: \(mejorConexion) y \(segundaConexion)")
+        }
+        print("Estaciones recorridas: \(menorCantidad)")
         print("Tiempo aproximado: \(tiempoAproximado) minutos")
+        print("Incluye 5 minutos aproximados por cada cambio de línea.")
         print("El tiempo puede variar según la espera y el servicio.")
     }
-func viajarEntreEstaciones() {
-        print("\n================================")
-        print("     VIAJAR HACIA OTRA ESTACIÓN")
-        print("================================")
-        print("¿En qué estación te encuentras?")
-        let origenIngresado = readLine() ?? ""
-        
-        print("¿A qué estación quieres llegar?")
-        let destinoIngresado = readLine() ?? ""
-        
-        guard let origen = obtenerNombreCorrecto(origenIngresado) else {
-            print("No se encontró la estación de origen.")
-            return
-        }
-        
-        guard let destino = obtenerNombreCorrecto(destinoIngresado) else {
-            print("No se encontró la estación de destino.")
-            return
-        }
-        
-        if let lineaCompartida = buscarLineaCompartida(origen: origen, destino: destino) {
-            mostrarRutaDirecta(origen: origen, destino: destino, linea: lineaCompartida)
-        } else {
-            print("\nLas estaciones pertenecen a líneas diferentes.")
-            print("La ruta con cambio de línea se agregará en el siguiente avance.")
-        }
-    }
-
+}
 
 var opcionPrincipal = 0
 
-while opcionPrincipal != 3 {
+while opcionPrincipal != 4 {
     print("\n================================")
     print("        METROGUÍA LIMA")
     print("================================")
@@ -276,10 +498,10 @@ while opcionPrincipal != 3 {
     } else if opcionPrincipal == 2 {
         buscarEstacion()
     } else if opcionPrincipal == 3 {
-           viajarEntreEstaciones()
+        viajarEntreEstaciones()
     } else if opcionPrincipal == 4 {
         print("Gracias por utilizar MetroGuía Lima.")
     } else {
-        print("Opción incorrecta. Ingresa un número del 1 al 3.")
+        print("Opción incorrecta. Ingresa un número del 1 al 4.")
     }
 }
