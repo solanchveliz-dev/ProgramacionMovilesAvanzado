@@ -145,19 +145,19 @@ func buscarEstacion() {
     print("          BUSCAR ESTACIÓN")
     print("================================")
     print("Escribe el nombre de la estación:")
-
+    
     let nombreIngresado = readLine() ?? ""
-
+    
     if let nombreCorrecto = obtenerNombreCorrecto(nombreIngresado) {
         let lineasEncontradas = obtenerLineasDeEstacion(nombreCorrecto)
-
+        
         print("\nEstación encontrada: \(nombreCorrecto)")
-
+        
         if lineasEncontradas.count == 1 {
             print("Pertenece a la Línea \(lineasEncontradas[0]).")
         } else {
             print("Esta estación conecta las siguientes líneas:")
-
+            
             for linea in lineasEncontradas {
                 print("- Línea \(linea)")
             }
@@ -167,6 +167,94 @@ func buscarEstacion() {
         print("Verifica el nombre e intenta nuevamente.")
     }
 }
+func buscarLineaCompartida(origen: String, destino: String) -> String? {
+        let lineasOrigen = obtenerLineasDeEstacion(origen)
+        let lineasDestino = obtenerLineasDeEstacion(destino)
+
+        for lineaOrigen in lineasOrigen {
+            if lineasDestino.contains(lineaOrigen) {
+                return lineaOrigen
+            }
+        }
+
+        return nil
+    }
+
+func mostrarRutaDirecta(origen: String, destino: String, linea: String) {
+        guard let estaciones = lineas[linea],
+              let posicionOrigen = estaciones.firstIndex(of: origen),
+              let posicionDestino = estaciones.firstIndex(of: destino) else {
+            print("No se pudo calcular la ruta.")
+            return
+        }
+
+        if posicionOrigen == posicionDestino {
+            print("Ya te encuentras en la estación \(origen).")
+            return
+        }
+
+        let cantidadEstaciones = abs(posicionDestino - posicionOrigen)
+        let tiempoAproximado = cantidadEstaciones * 2
+    print("\n================================")
+        print("        RUTA ENTRE ESTACIONES")
+        print("================================")
+        print("Origen: \(origen)")
+        print("Destino: \(destino)")
+        print("Línea: Línea \(linea)\n")
+        print("Aborda la Línea \(linea) en \(origen).")
+
+        if posicionOrigen < posicionDestino {
+            print("Sube al tren que va hacia \(estaciones[estaciones.count - 1]).")
+            print("\nEstaciones del recorrido:")
+
+            for posicion in posicionOrigen...posicionDestino {
+                print("\(posicion - posicionOrigen + 1). \(estaciones[posicion])")
+            }
+        } else {
+            print("Sube al tren que va hacia \(estaciones[0]).")
+            print("\nEstaciones del recorrido:")
+
+            var numero = 1
+            for posicion in stride(from: posicionOrigen, through: posicionDestino, by: -1) {
+                print("\(numero). \(estaciones[posicion])")
+                numero += 1
+            }
+        }
+
+        print("\nBaja en \(destino).")
+        print("No necesitas cambiar de línea.")
+        print("Estaciones recorridas: \(cantidadEstaciones)")
+        print("Tiempo aproximado: \(tiempoAproximado) minutos")
+        print("El tiempo puede variar según la espera y el servicio.")
+    }
+func viajarEntreEstaciones() {
+        print("\n================================")
+        print("     VIAJAR HACIA OTRA ESTACIÓN")
+        print("================================")
+        print("¿En qué estación te encuentras?")
+        let origenIngresado = readLine() ?? ""
+        
+        print("¿A qué estación quieres llegar?")
+        let destinoIngresado = readLine() ?? ""
+        
+        guard let origen = obtenerNombreCorrecto(origenIngresado) else {
+            print("No se encontró la estación de origen.")
+            return
+        }
+        
+        guard let destino = obtenerNombreCorrecto(destinoIngresado) else {
+            print("No se encontró la estación de destino.")
+            return
+        }
+        
+        if let lineaCompartida = buscarLineaCompartida(origen: origen, destino: destino) {
+            mostrarRutaDirecta(origen: origen, destino: destino, linea: lineaCompartida)
+        } else {
+            print("\nLas estaciones pertenecen a líneas diferentes.")
+            print("La ruta con cambio de línea se agregará en el siguiente avance.")
+        }
+    }
+
 
 var opcionPrincipal = 0
 
@@ -176,7 +264,8 @@ while opcionPrincipal != 3 {
     print("================================")
     print("1. Explorar líneas y estaciones")
     print("2. Buscar una estación")
-    print("3. Salir")
+    print("3. Viajar hacia otra estación")
+    print("4. Salir")
     print("Selecciona una opción:")
 
     let entrada = readLine() ?? ""
@@ -187,6 +276,8 @@ while opcionPrincipal != 3 {
     } else if opcionPrincipal == 2 {
         buscarEstacion()
     } else if opcionPrincipal == 3 {
+           viajarEntreEstaciones()
+    } else if opcionPrincipal == 4 {
         print("Gracias por utilizar MetroGuía Lima.")
     } else {
         print("Opción incorrecta. Ingresa un número del 1 al 3.")
