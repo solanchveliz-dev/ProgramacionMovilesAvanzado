@@ -1,52 +1,5 @@
 import Foundation
 
-// METROGUÍA LIMA
-
-// COMMIT 4: Búsqueda de lugares y recomendación de estaciones.
-
-// Primera versión para ejecutarse mediante la consola de la Mac.
-
-// REQUERIMIENTOS FUNCIONALES IMPLEMENTADOS
-
-// RF01: Mostrar el menú principal.
-
-// RF02: Almacenar las estaciones de las líneas 1, 2, 3 y 4.
-
-// RF03: Aceptar nombres con o sin tildes y mayúsculas.
-
-// RF04: Explorar líneas, estaciones, horarios y tarifas.
-
-// RF05: Identificar las líneas a las que pertenece una estación.
-
-// RF06: Calcular rutas directas dentro de una misma línea.
-
-// RF07: Indicar la dirección correcta del tren.
-
-// RF08: Calcular rutas con cambio de línea.
-
-// RF09: Utilizar las estaciones oficiales de conexión.
-
-// RF10: Seleccionar la conexión que recorra menos estaciones.
-
-// RF11: Calcular el tiempo aproximado del recorrido.
-
-// RF12: Buscar un lugar por su nombre.
-
-// RF13: Mostrar coincidencias cuando varios lugares se parecen.
-
-// RF14: Buscar lugares por categoría.
-
-// RF15: Recomendar una estación para llegar a un lugar.
-
-// RF16: Mostrar lugares relacionados con una estación.
-
-// RF17: Mostrar la dirección del lugar seleccionado.
-
-// RF18: Finalizar el programa cuando el usuario seleccione salir.
-
-// RF19: Mostrar juntos los horarios y tarifas de todas las líneas.
-
-// ================================================================
 
 // RF02: COLECCIONES DE LÍNEAS Y ESTACIONES
 
