@@ -1,4 +1,4 @@
-// ===== CASO 2: BIBLIOTECA =====
+// ===== CASO 2 — PARTE A: BIBLIOTECA =====
 
 // MARK: - Estado del libro
 
@@ -31,7 +31,7 @@ class Biblioteca {
         libros.append(libro)
     }
 
-    // Busca y presta un libro.
+    // Busca un libro y lo presta.
     func prestar(titulo: String) -> Bool {
         for i in 0..<libros.count {
 
@@ -52,7 +52,7 @@ class Biblioteca {
         return false
     }
 
-    // Busca y devuelve un libro.
+    // Busca un libro prestado y lo devuelve.
     func devolver(titulo: String) -> Bool {
         for i in 0..<libros.count {
 
@@ -73,17 +73,21 @@ class Biblioteca {
         return false
     }
 
-    // Muestra todos los libros.
+    // Muestra todos los libros con su estado.
     func inventario() {
         print("===== INVENTARIO =====")
 
         for libro in libros {
             switch libro.estado {
             case .disponible:
-                print("\(libro.titulo) (\(libro.autor)) - disponible")
+                print(
+                    "\(libro.titulo) (\(libro.autor)) - disponible"
+                )
 
             case .prestado:
-                print("\(libro.titulo) (\(libro.autor)) - prestado")
+                print(
+                    "\(libro.titulo) (\(libro.autor)) - prestado"
+                )
             }
         }
     }
@@ -108,17 +112,35 @@ let libro3 = Libro(
     autor: "Miguel de Cervantes"
 )
 
-// Agregamos los libros.
+// Agregamos los tres libros.
+
 biblioteca.agregar(libro: libro1)
 biblioteca.agregar(libro: libro2)
 biblioteca.agregar(libro: libro3)
 
 // Realizamos las operaciones solicitadas.
-biblioteca.prestar(titulo: "La ciudad y los perros")
-biblioteca.prestar(titulo: "La ciudad y los perros")
-biblioteca.devolver(titulo: "La ciudad y los perros")
-biblioteca.prestar(titulo: "El Quijote")
-biblioteca.prestar(titulo: "El Principito")
+// "_ =" indica que ignoramos intencionalmente el Bool devuelto.
 
-// Mostramos el resultado final.
+_ = biblioteca.prestar(
+    titulo: "La ciudad y los perros"
+)
+
+_ = biblioteca.prestar(
+    titulo: "La ciudad y los perros"
+)
+
+_ = biblioteca.devolver(
+    titulo: "La ciudad y los perros"
+)
+
+_ = biblioteca.prestar(
+    titulo: "El Quijote"
+)
+
+_ = biblioteca.prestar(
+    titulo: "El Principito"
+)
+
+// Mostramos el inventario final.
+
 biblioteca.inventario()
