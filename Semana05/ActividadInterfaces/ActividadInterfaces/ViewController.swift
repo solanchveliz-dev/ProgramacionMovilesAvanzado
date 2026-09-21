@@ -22,6 +22,9 @@ class ViewController: UIViewController {
        
     }
 
-
+    @IBAction func calcularPrestamo(_ sender: UIButton) {
+    
+    }
+    
 }
 
