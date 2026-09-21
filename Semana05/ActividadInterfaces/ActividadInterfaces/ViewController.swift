@@ -19,12 +19,25 @@ class ViewController: UIViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
-       
+        
     }
-
+    
     @IBAction func calcularPrestamo(_ sender: UIButton) {
-    
+        guard
+              let capitalTexto = capitalTextField.text,
+              let tasaTexto = tasaTextField.text,
+              let plazoTexto = plazoTextField.text else {
+            return
+            
+        }
+        let capital = Double(capitalTexto) ?? 0
+        let tasaAnual = Double(tasaTexto) ?? 0
+        let plazoAnios = Double(plazoTexto) ?? 0
+        
+        print("Capital:", capital)
+        print("Tasa:", tasaAnual)
+        print("Plazo:", plazoAnios)
+        
     }
-    
 }
 
