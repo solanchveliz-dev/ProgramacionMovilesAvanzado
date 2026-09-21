@@ -87,6 +87,13 @@
                         <viewLayoutGuide key="safeArea" id="6Tk-OE-BBY"/>
                         <color key="backgroundColor" systemColor="systemBackgroundColor"/>
                     </view>
+                    <connections>
+                        <outlet property="capitalTextField" destination="8eV-py-cbm" id="6NB-Vz-eGX"/>
+                        <outlet property="cuotaLabel" destination="Exv-jI-7aQ" id="Dwd-KE-yDT"/>
+                        <outlet property="plazoTextField" destination="EgX-Cc-YJa" id="XHu-My-2WJ"/>
+                        <outlet property="tasaTextField" destination="dR5-Ac-NXe" id="Vpc-16-NP4"/>
+                        <outlet property="totalLabel" destination="EUV-VZ-coU" id="vhe-y5-tFz"/>
+                    </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="dkx-z0-nzr" sceneMemberID="firstResponder"/>
             </objects>
