@@ -34,9 +34,18 @@ class ViewController: UIViewController {
         let tasaAnual = Double(tasaTexto) ?? 0
         let plazoAnios = Double(plazoTexto) ?? 0
         
-        print("Capital:", capital)
-        print("Tasa:", tasaAnual)
-        print("Plazo:", plazoAnios)
+        let tasaMensual = tasaAnual / 100 / 12
+           let numeroPagos = plazoAnios * 12
+
+           let potencia = pow(1 + tasaMensual, numeroPagos)
+
+           let cuotaMensual =
+               capital * (tasaMensual * potencia) / (potencia - 1)
+        let montoTotal = cuotaMensual * numeroPagos
+        
+        cuotaLabel.text = String(format: "Cuota mensual: S/ %.2f", cuotaMensual)
+
+        totalLabel.text = String(format: "Monto total: S/ %.2f", montoTotal)
         
     }
 }
