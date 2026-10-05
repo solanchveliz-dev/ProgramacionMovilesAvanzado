@@ -110,6 +110,13 @@
                         <color key="backgroundColor" systemColor="systemBackgroundColor"/>
                     </view>
                     <navigationItem key="navigationItem" id="z6R-pG-sCb"/>
+                    <connections>
+                        <outlet property="tfCantidad" destination="P3B-8L-ZWa" id="VDY-VT-EA9"/>
+                        <outlet property="tfElectrodomestico" destination="vfP-SN-LyG" id="d9w-WM-qSe"/>
+                        <outlet property="tfInteres" destination="luM-Em-Cel" id="HIW-GU-Hvy"/>
+                        <outlet property="tfMeses" destination="8YV-GK-MvG" id="i7I-YR-gfy"/>
+                        <outlet property="tfPrecio" destination="9v5-Rr-pnB" id="5ME-Gx-MS4"/>
+                    </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="dkx-z0-nzr" sceneMemberID="firstResponder"/>
             </objects>
@@ -200,13 +207,6 @@
                                 <nil key="textColor"/>
                                 <nil key="highlightedColor"/>
                             </label>
-                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" fixedFrame="YES" text="S/. 0.00" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="3F5-2A-xCq">
-                                <rect key="frame" x="222" y="406" width="117" height="21"/>
-                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
-                                <fontDescription key="fontDescription" type="system" weight="heavy" pointSize="17"/>
-                                <nil key="textColor"/>
-                                <nil key="highlightedColor"/>
-                            </label>
                             <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" fixedFrame="YES" text="S/. 0.00" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="w2x-Nf-JkD">
                                 <rect key="frame" x="222" y="435" width="117" height="21"/>
                                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
@@ -219,11 +219,26 @@
                                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
                                 <color key="backgroundColor" systemColor="systemGray2Color"/>
                             </view>
+                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" fixedFrame="YES" text="S/. 0.00" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="3F5-2A-xCq">
+                                <rect key="frame" x="222" y="406" width="117" height="21"/>
+                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                                <fontDescription key="fontDescription" type="system" weight="heavy" pointSize="17"/>
+                                <nil key="textColor"/>
+                                <nil key="highlightedColor"/>
+                            </label>
                         </subviews>
                         <viewLayoutGuide key="safeArea" id="vfb-RG-qdB"/>
                         <color key="backgroundColor" systemColor="systemBackgroundColor"/>
                     </view>
                     <navigationItem key="navigationItem" id="C7v-nK-Dhl"/>
+                    <connections>
+                        <outlet property="lblBase" destination="Uhu-Ih-QUd" id="lJp-j5-ggC"/>
+                        <outlet property="lblCuota" destination="w2x-Nf-JkD" id="R6A-8s-QAk"/>
+                        <outlet property="lblIgv" destination="q8B-qf-yr3" id="7HQ-Xe-A5p"/>
+                        <outlet property="lblIntereses" destination="InB-DO-nLx" id="d3h-E0-8id"/>
+                        <outlet property="lblSubtotal" destination="hpx-sN-beg" id="FIW-7v-nst"/>
+                        <outlet property="lblTotal" destination="3F5-2A-xCq" id="B72-6s-NJI"/>
+                    </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="DD0-0J-itd" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
             </objects>
