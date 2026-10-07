@@ -1,56 +1,64 @@
-# Calculadora de Venta a Plazos — Semana 06 (Ejercicio 4)
+# Calculadora de Venta a Plazos de Electrodoméstico
 
-App en UIKit + Storyboard que calcula la venta a plazos de un electrodoméstico
-y muestra el resultado en otra pantalla usando un segue Show y un modelo propio.
+**Curso:** Programación en Móviles Avanzado · **Semana:** 06 · **Ejercicio:** 4 (rama `ai-assisted`)
 
-## Requerimientos funcionales
+## 1. Descripción
 
-RF01. La pantalla "Nueva Venta" debe permitir ingresar: electrodoméstico,
-precio unitario, cantidad, número de meses e interés mensual (%).
+Aplicación iOS desarrollada en UIKit con Storyboard que calcula la venta a plazos de un electrodoméstico. El usuario ingresa los datos de la venta y la app muestra el detalle del pago en una segunda pantalla, usando navegación **Show** y un modelo propio (`VentaModel`).
 
-RF02. Los campos numéricos deben mostrar el teclado decimal.
+## 2. Tecnologías
 
-RF03. Al tocar "Calcular", la app debe calcular:
-- subtotal = precio unitario × cantidad
-- IGV = subtotal × 0.18
-- base = subtotal + IGV
-- intereses = base × (interés mensual / 100) × meses
-- total = base + intereses
-- cuota mensual = total / meses
+- Swift · UIKit · Storyboard (Interface Builder)
+- `UINavigationController` y segue Show
+- Paso de datos con `prepare(for:sender:)`
 
-RF04. Si un campo está vacío o tiene texto no numérico, se toma como 0
-y la app no debe cerrarse.
-
-RF05. Si el número de meses es 0, la cuota mensual debe mostrarse como S/. 0.00
-(no se divide entre cero).
-
-RF06. Los resultados deben pasarse a la pantalla "Resultado" dentro de un
-objeto VentaModel, usando el segue Show con identifier `showResultado`
-y el método `prepare(for:sender:)`.
-
-RF07. La pantalla "Resultado" debe mostrar subtotal, IGV, base, intereses,
-total y cuota mensual, todos con formato en soles: `S/. 0.00`.
-
-RF08. Desde "Resultado" se debe poder regresar a "Nueva Venta" con el botón
-de retroceso del Navigation Controller.
-
-RF09. Al tocar fuera de los campos, el teclado debe ocultarse.
-
-## Estructura
+## 3. Estructura del proyecto
 
 | Archivo | Responsabilidad |
 |---|---|
 | `VentaModel.swift` | Clase `NSObject` con 6 propiedades `Double`: subtotal, igv, base, intereses, total, cuota |
-| `NuevaVentaViewController.swift` | Lee los 5 campos, calcula y envía el modelo en `prepare(for:sender:)` |
-| `ResultadoViewController.swift` | Recibe `pVenta` y muestra los 6 valores formateados |
+| `NuevaVentaViewController.swift` | Lee los 5 campos, aplica las fórmulas y envía el modelo |
+| `ResultadoViewController.swift` | Recibe `pVenta` y muestra los resultados en soles |
 | `Main.storyboard` | Navigation Controller → Nueva Venta → (Show `showResultado`) → Resultado |
 
-## Cómo probarlo
+## 4. Requerimientos funcionales
 
-1. Ejecutar en el simulador (Cmd + R).
-2. Ingresar: Refrigeradora · precio 1750 · cantidad 2 · meses 12 · interés 1.
-3. Tocar "Calcular".
-4. Resultado esperado:
+| Código | Requerimiento |
+|---|---|
+| RF01 | La pantalla "Nueva Venta" permitirá ingresar el electrodoméstico, precio unitario, cantidad, número de meses e interés mensual. |
+| RF02 | Los campos numéricos mostrarán el teclado decimal. |
+| RF03 | El sistema calculará el subtotal, IGV, base, intereses, total y cuota mensual según las fórmulas definidas. |
+| RF04 | Los campos vacíos o con valores no numéricos serán considerados como 0, evitando el cierre inesperado de la aplicación. |
+| RF05 | Cuando el número de meses sea 0, la cuota mensual será S/. 0.00. |
+| RF06 | El resultado será enviado a la pantalla "Resultado" mediante un objeto `VentaModel` utilizando el segue `showResultado`. |
+| RF07 | La pantalla "Resultado" mostrará los seis resultados con formato monetario `S/. 0.00`. |
+| RF08 | El usuario podrá regresar a "Nueva Venta" mediante el botón de retroceso del Navigation Controller. |
+| RF09 | Al tocar fuera de los campos de texto, el teclado será ocultado. |
+
+## 5. Fórmulas de cálculo
+
+```
+Subtotal      = Precio unitario × Cantidad
+IGV           = Subtotal × 0.18
+Base          = Subtotal + IGV
+Intereses     = Base × (Interés mensual / 100) × Meses
+Total         = Base + Intereses
+Cuota mensual = Total / Meses
+```
+
+## 6. Caso de prueba
+
+**Datos de entrada**
+
+| Campo | Valor |
+|---|---|
+| Electrodoméstico | Refrigeradora |
+| Precio unitario | 1750 |
+| Cantidad | 2 |
+| Meses | 12 |
+| Interés mensual (%) | 1 |
+
+**Resultado esperado**
 
 | Concepto | Valor |
 |---|---|
@@ -61,4 +69,4 @@ RF09. Al tocar fuera de los campos, el teclado debe ocultarse.
 | Total | S/. 4625.60 |
 | Cuota mensual | S/. 385.47 |
 
-5. Probar dejando "Meses" vacío: la cuota debe salir S/. 0.00 sin que la app se cierre.
+**Caso adicional:** dejar "Meses" vacío → la cuota debe mostrarse S/. 0.00 y la app no debe cerrarse (RF04 y RF05).
