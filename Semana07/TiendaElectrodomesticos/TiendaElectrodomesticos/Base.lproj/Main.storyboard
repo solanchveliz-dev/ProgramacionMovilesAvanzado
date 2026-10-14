@@ -17,37 +17,34 @@
                         <rect key="frame" x="0.0" y="0.0" width="393" height="852"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
-                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" fixedFrame="YES" text="Tienda Tecsup" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="2cg-8H-YFc">
-                                <rect key="frame" x="108" y="189" width="176" height="32"/>
-                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
-                                <fontDescription key="fontDescription" type="boldSystem" pointSize="26"/>
-                                <nil key="textColor"/>
-                                <nil key="highlightedColor"/>
-                            </label>
-                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" fixedFrame="YES" text="Elige un producto" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="aJp-VN-yIm">
-                                <rect key="frame" x="126" y="258" width="140" height="21"/>
-                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
-                                <fontDescription key="fontDescription" type="system" weight="semibold" pointSize="17"/>
-                                <color key="textColor" white="0.33333333333333331" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
-                                <nil key="highlightedColor"/>
-                            </label>
-                            <stackView opaque="NO" contentMode="scaleToFill" misplaced="YES" axis="vertical" spacing="16" translatesAutoresizingMaskIntoConstraints="NO" id="cij-qB-CjH">
-                                <rect key="frame" x="20" y="317" width="353" height="297"/>
+                            <stackView opaque="NO" contentMode="scaleToFill" misplaced="YES" axis="vertical" spacing="33" translatesAutoresizingMaskIntoConstraints="NO" id="cij-qB-CjH">
+                                <rect key="frame" x="20" y="185" width="353" height="482.66666666666674"/>
                                 <subviews>
+                                    <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Tienda Tecsup" textAlignment="center" lineBreakMode="tailTruncation" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="2cg-8H-YFc">
+                                        <rect key="frame" x="0.0" y="0.0" width="353" height="31.333333333333332"/>
+                                        <fontDescription key="fontDescription" type="boldSystem" pointSize="26"/>
+                                        <nil key="textColor"/>
+                                        <nil key="highlightedColor"/>
+                                    </label>
+                                    <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Elige un producto" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="aJp-VN-yIm">
+                                        <rect key="frame" x="0.0" y="64.333333333333314" width="353" height="20.333333333333329"/>
+                                        <fontDescription key="fontDescription" type="system" weight="semibold" pointSize="17"/>
+                                        <color key="textColor" white="0.33333333333333331" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                                        <nil key="highlightedColor"/>
+                                    </label>
                                     <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="e9I-kz-Kud">
-                                        <rect key="frame" x="0.0" y="0.0" width="353" height="50"/>
+                                        <rect key="frame" x="0.0" y="117.66666666666669" width="353" height="50"/>
                                         <constraints>
-                                            <constraint firstAttribute="height" constant="50" id="bxo-he-6MA"/>
+                                            <constraint firstAttribute="height" constant="50" id="0Rs-6T-EX9"/>
                                         </constraints>
                                         <state key="normal" title="Button"/>
                                         <buttonConfiguration key="configuration" style="tinted" title="Refrigeradora - S/ 2000" cornerStyle="large"/>
                                         <connections>
-                                            <action selector="openDetail:" destination="BYZ-38-t0r" eventType="touchUpInside" id="5QZ-BD-cms"/>
                                             <action selector="openDetailRefrigerator:" destination="BYZ-38-t0r" eventType="touchUpInside" id="HWo-Bj-AAI"/>
                                         </connections>
                                     </button>
                                     <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="0Mw-Po-3il">
-                                        <rect key="frame" x="0.0" y="66" width="353" height="50"/>
+                                        <rect key="frame" x="0.0" y="200.66666666666669" width="353" height="50"/>
                                         <constraints>
                                             <constraint firstAttribute="height" constant="50" id="vrJ-cN-zco"/>
                                         </constraints>
@@ -59,7 +56,7 @@
                                         </connections>
                                     </button>
                                     <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="VAt-oG-mvl">
-                                        <rect key="frame" x="0.0" y="132" width="353" height="50"/>
+                                        <rect key="frame" x="0.0" y="283.66666666666669" width="353" height="50"/>
                                         <constraints>
                                             <constraint firstAttribute="height" constant="50" id="6KY-jT-MN6"/>
                                         </constraints>
@@ -71,7 +68,7 @@
                                         </connections>
                                     </button>
                                     <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="btm-h9-wp7">
-                                        <rect key="frame" x="0.0" y="198" width="353" height="50"/>
+                                        <rect key="frame" x="0.0" y="366.66666666666663" width="353" height="50"/>
                                         <constraints>
                                             <constraint firstAttribute="height" constant="50" id="7Zj-ou-Rdf"/>
                                         </constraints>
@@ -83,12 +80,12 @@
                                         </connections>
                                     </button>
                                     <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="kKx-R9-MXd">
-                                        <rect key="frame" x="0.0" y="264" width="353" height="33"/>
+                                        <rect key="frame" x="0.0" y="449.66666666666663" width="353" height="33"/>
                                         <fontDescription key="fontDescription" type="system" weight="semibold" pointSize="17"/>
                                         <inset key="imageEdgeInsets" minX="0.0" minY="0.0" maxX="2.2250738585072014e-308" maxY="0.0"/>
                                         <state key="normal" title="Ver carrito (0)"/>
                                         <connections>
-                                            <action selector="openCart:" destination="BYZ-38-t0r" eventType="touchUpInside" id="WHt-dJ-4pF"/>
+                                            <action selector="openCart:" destination="BYZ-38-t0r" eventType="touchUpInside" id="gMd-JZ-zjb"/>
                                         </connections>
                                     </button>
                                 </subviews>
@@ -98,7 +95,6 @@
                         <color key="backgroundColor" systemColor="tertiarySystemBackgroundColor"/>
                         <constraints>
                             <constraint firstItem="cij-qB-CjH" firstAttribute="top" secondItem="6Tk-OE-BBY" secondAttribute="top" constant="20" id="44r-cy-k1y"/>
-                            <constraint firstItem="cij-qB-CjH" firstAttribute="top" secondItem="8bC-Xf-vdC" secondAttribute="top" constant="20" id="7Vs-S3-bjJ"/>
                             <constraint firstItem="cij-qB-CjH" firstAttribute="leading" secondItem="6Tk-OE-BBY" secondAttribute="leading" constant="20" id="Ef1-Rf-s2z"/>
                             <constraint firstItem="6Tk-OE-BBY" firstAttribute="trailing" secondItem="cij-qB-CjH" secondAttribute="trailing" constant="20" id="cXG-Kd-H8x"/>
                         </constraints>
@@ -107,7 +103,7 @@
                         <nil key="title"/>
                     </navigationItem>
                     <connections>
-                        <outlet property="openCart" destination="kKx-R9-MXd" id="dyN-zu-ZQl"/>
+                        <outlet property="cartButton" destination="kKx-R9-MXd" id="6VO-NR-4hU"/>
                         <segue destination="haU-u9-aoK" kind="show" identifier="verDetalle" id="7Up-9p-zUO"/>
                     </connections>
                 </viewController>
@@ -124,7 +120,7 @@
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
                             <view contentMode="scaleToFill" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="t45-4a-09c">
-                                <rect key="frame" x="37" y="494" width="195" height="69"/>
+                                <rect key="frame" x="37" y="496" width="259" height="44"/>
                                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
                                 <subviews>
                                     <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" fixedFrame="YES" text="S/2000.00" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="vG8-bC-qbq">
@@ -215,6 +211,10 @@
                                 <nil key="textColor"/>
                                 <nil key="highlightedColor"/>
                             </label>
+                            <stackView opaque="NO" contentMode="scaleToFill" fixedFrame="YES" axis="vertical" translatesAutoresizingMaskIntoConstraints="NO" id="QQK-FX-omS">
+                                <rect key="frame" x="37" y="195" width="320" height="517"/>
+                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                            </stackView>
                         </subviews>
                         <viewLayoutGuide key="safeArea" id="fDe-S6-NQD"/>
                         <color key="backgroundColor" systemColor="systemBackgroundColor"/>
