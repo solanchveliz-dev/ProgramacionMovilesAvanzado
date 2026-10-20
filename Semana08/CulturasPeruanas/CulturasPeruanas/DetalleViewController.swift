@@ -1,29 +1,22 @@
-//
-//  DetalleViewController.swift
-//  CulturasPeruanas
-//
-//  Created by Naomi Solanch Veliz Pie on 20/10/26.
-//
-
 import UIKit
 
 class DetalleViewController: UIViewController {
 
+    @IBOutlet weak var imagenView: UIImageView!
+    @IBOutlet weak var nombreLabel: UILabel!
+    @IBOutlet weak var regionLabel: UILabel!
+    @IBOutlet weak var descripcionLabel: UILabel!
+
+    var cultura: Cultura?
+
     override func viewDidLoad() {
         super.viewDidLoad()
+        guard let cultura = cultura else { return }
 
-        // Do any additional setup after loading the view.
+        title = cultura.nombre
+        nombreLabel.text = cultura.nombre
+        regionLabel.text = "Región: \(cultura.region)"
+        descripcionLabel.text = cultura.descripcion
+        imagenView.image = UIImage(named: cultura.imagen) ?? UIImage(systemName: "photo")
     }
-    
-
-    /*
-    // MARK: - Navigation
-
-    // In a storyboard-based application, you will often want to do a little preparation before navigation
-    override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
-        // Get the new view controller using segue.destination.
-        // Pass the selected object to the new view controller.
-    }
-    */
-
 }

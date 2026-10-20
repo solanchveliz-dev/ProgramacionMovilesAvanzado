@@ -1,8 +1,8 @@
-//
-//  File.swift
-//  CulturasPeruanas
-//
-//  Created by Naomi Solanch Veliz Pie on 20/10/26.
-//
-
 import Foundation
+
+struct Cultura {
+    let nombre: String
+    let region: String
+    let descripcion: String
+    let imagen: String
+}
