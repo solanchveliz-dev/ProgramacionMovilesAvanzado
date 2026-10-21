@@ -1,0 +1,12 @@
+# Requerimientos funcionales – Culturas Peruanas
+
+- **RF01:** El sistema debe mostrar, al iniciar la app, una lista de 8 culturas peruanas en un `UITableView`.
+- **RF02:** Cada celda debe mostrar la imagen representativa de la cultura, cargada desde `Assets`.
+- **RF03:** Cada celda debe mostrar el nombre de la cultura y, debajo, su región en texto secundario.
+- **RF04:** El usuario debe poder seleccionar una cultura tocando su celda; la selección se desmarca al volver a la lista.
+- **RF05:** Al seleccionar una cultura, el sistema debe navegar a la pantalla de detalle mediante el segue `showDetalle`.
+- **RF06:** El sistema debe enviar los datos de la cultura seleccionada al detalle usando `prepare(for:sender:)`.
+- **RF07:** La pantalla de detalle debe mostrar la imagen, nombre, región y descripción completa de la cultura.
+- **RF08:** El usuario debe poder regresar a la lista con el botón "atrás" o deslizando desde el borde izquierdo.
+- **RF09:** El sistema debe mostrar una imagen por defecto si la imagen de una cultura no existe, sin que la app se cierre.
+- **RF10:** Las imágenes deben mostrarse con tamaño uniforme y bordes redondeados, sin estirarse ni deformarse.
