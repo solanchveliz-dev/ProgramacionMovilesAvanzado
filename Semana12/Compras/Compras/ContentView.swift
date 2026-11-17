@@ -1,61 +1,30 @@
-//
-//  ContentView.swift
-//  Compras
-//
-//  Created by Naomi Solanch Veliz Pie on 17/11/26.
-//
-
 import SwiftUI
 import SwiftData
 
+// Pantalla temporal: comprueba que el modelo de datos funciona.
+// En los siguientes pasos se reemplaza por el login.
 struct ContentView: View {
-    @Environment(\.modelContext) private var modelContext
-    @Query private var items: [Item]
+    @Query private var usuarios: [Usuario]
+    @Query private var proveedores: [Proveedor]
+    @Query private var productos: [Producto]
+    @Query private var compras: [Compra]
 
     var body: some View {
-        NavigationSplitView {
+        NavigationStack {
             List {
-                ForEach(items) { item in
-                    NavigationLink {
-                        Text("Item at \(item.timestamp, format: Date.FormatStyle(date: .numeric, time: .standard))")
-                    } label: {
-                        Text(item.timestamp, format: Date.FormatStyle(date: .numeric, time: .standard))
-                    }
-                }
-                .onDelete(perform: deleteItems)
-            }
-            .toolbar {
-                ToolbarItem(placement: .navigationBarTrailing) {
-                    EditButton()
-                }
-                ToolbarItem {
-                    Button(action: addItem) {
-                        Label("Add Item", systemImage: "plus")
-                    }
+                Section("Modelo de datos listo") {
+                    LabeledContent("Usuarios", value: "\(usuarios.count)")
+                    LabeledContent("Proveedores", value: "\(proveedores.count)")
+                    LabeledContent("Productos", value: "\(productos.count)")
+                    LabeledContent("Compras", value: "\(compras.count)")
                 }
             }
-        } detail: {
-            Text("Select an item")
-        }
-    }
-
-    private func addItem() {
-        withAnimation {
-            let newItem = Item(timestamp: Date())
-            modelContext.insert(newItem)
-        }
-    }
-
-    private func deleteItems(offsets: IndexSet) {
-        withAnimation {
-            for index in offsets {
-                modelContext.delete(items[index])
-            }
+            .navigationTitle("Compras")
         }
     }
 }
 
 #Preview {
     ContentView()
-        .modelContainer(for: Item.self, inMemory: true)
+        .modelContainer(for: [Usuario.self, Proveedor.self, Producto.self, Compra.self], inMemory: true)
 }
