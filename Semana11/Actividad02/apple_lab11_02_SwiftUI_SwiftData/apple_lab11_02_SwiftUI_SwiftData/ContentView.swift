@@ -10,6 +10,7 @@ struct ContentView: View {
     @State private var alumnoSeleccionado: Alumno?      // Alumno seleccionado en la lista
     @State private var mostrarFormulario = false        // Muestra el formulario de nuevo alumno
     @State private var alumnoAEditar: Alumno?           // Alumno que se está editando (Paso 9)
+    @State private var mostrarCursos = false            // EXTRA: pantalla de cursos
 
     @State private var busqueda = ""                    // Texto de búsqueda (Paso 10)
 
@@ -28,7 +29,7 @@ struct ContentView: View {
                         VStack(alignment: .leading) {
                             Text("\(alumno.apellido), \(alumno.nombre)")
                                 .font(.headline)
-                            Text("DNI: \(alumno.dni)")
+                            Text("DNI: \(alumno.dni) · \(alumno.curso?.nombre ?? "Sin curso")")
                                 .font(.subheadline)
                         }
                     }
@@ -48,11 +49,12 @@ struct ContentView: View {
                         Label("Nuevo Alumno", systemImage: "plus")
                     }
                 }
+                // EXTRA: en lugar del "Curso demo", una pantalla real de cursos
                 ToolbarItem {
                     Button {
-                        asignarCursoDemo()
+                        mostrarCursos = true
                     } label: {
-                        Label("Curso demo", systemImage: "book")
+                        Label("Cursos", systemImage: "book")
                     }
                 }
             }
@@ -82,6 +84,10 @@ struct ContentView: View {
         .sheet(item: $alumnoAEditar) { alumno in
             EditarAlumnoView(alumno: alumno)
         }
+        // EXTRA: administrar cursos
+        .sheet(isPresented: $mostrarCursos) {
+            CursosView()
+        }
     }
 
     // DELETE: eliminar uno o más alumnos desde la lista
@@ -92,15 +98,6 @@ struct ContentView: View {
                 if alumnoSeleccionado == alumno { alumnoSeleccionado = nil }
                 modelContext.delete(alumno)
             }
-        }
-    }
-
-    // DEMOSTRACIÓN de relación: crea un curso y se lo asigna a todos los alumnos
-    private func asignarCursoDemo() {
-        let curso = Curso(nombre: "Programación en Móviles")
-        modelContext.insert(curso)
-        for alumno in alumnos {
-            alumno.curso = curso
         }
     }
 }

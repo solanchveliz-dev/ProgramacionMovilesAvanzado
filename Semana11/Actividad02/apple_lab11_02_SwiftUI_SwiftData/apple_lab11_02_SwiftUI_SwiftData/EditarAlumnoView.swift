@@ -9,6 +9,8 @@ struct EditarAlumnoView: View {
     @Bindable var alumno: Alumno
     @Environment(\.dismiss) private var dismiss
 
+    @Query(sort: \Curso.nombre) private var cursos: [Curso]   // EXTRA
+
     var body: some View {
         NavigationStack {
             Form {
@@ -17,6 +19,21 @@ struct EditarAlumnoView: View {
                     TextField("Nombre", text: $alumno.nombre)
                     TextField("DNI", text: $alumno.dni)
                         .keyboardType(.numberPad)
+                }
+
+                // EXTRA: cambiar el curso del alumno (se guarda solo, como los demás campos)
+                Section(header: Text("Curso")) {
+                    if cursos.isEmpty {
+                        Text("No hay cursos. Créalos con el botón 📘 Cursos de la lista.")
+                            .foregroundStyle(.secondary)
+                    } else {
+                        Picker("Curso", selection: $alumno.curso) {
+                            Text("Sin curso").tag(Curso?.none)
+                            ForEach(cursos) { curso in
+                                Text(curso.nombre).tag(Optional(curso))
+                            }
+                        }
+                    }
                 }
             }
             .navigationTitle("Editar Alumno")
