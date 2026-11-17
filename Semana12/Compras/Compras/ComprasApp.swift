@@ -3,15 +3,14 @@ import SwiftData
 
 @main
 struct ComprasApp: App {
-    // Una sola sesión para toda la app (quién está conectado)
+    // Una sola sesión para toda la app
     @State private var sesion = Sesion()
 
     var body: some Scene {
         WindowGroup {
-            ContentView()
-                .environment(sesion)      // Todas las pantallas pueden leer la sesión
+            RootView()          // Login o app, según la sesión
+                .environment(sesion)
         }
-        // Contenedor de SwiftData: guarda todo en ComprasData.sqlite
         .modelContainer(ContenedorDatos.shared.container)
     }
 }
