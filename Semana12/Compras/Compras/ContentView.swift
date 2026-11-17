@@ -1,30 +1,47 @@
 import SwiftUI
 import SwiftData
 
-// Pantalla temporal: comprueba que el modelo de datos funciona.
-// En los siguientes pasos se reemplaza por el login.
+// Pantalla temporal para probar el registro (B2).
+// En el siguiente paso se reemplaza por RootView (login).
 struct ContentView: View {
-    @Query private var usuarios: [Usuario]
-    @Query private var proveedores: [Proveedor]
-    @Query private var productos: [Producto]
-    @Query private var compras: [Compra]
+    @Environment(Sesion.self) private var sesion
+    @Query(sort: \Usuario.fechaRegistro) private var usuarios: [Usuario]
 
     var body: some View {
-        NavigationStack {
-            List {
-                Section("Modelo de datos listo") {
-                    LabeledContent("Usuarios", value: "\(usuarios.count)")
-                    LabeledContent("Proveedores", value: "\(proveedores.count)")
-                    LabeledContent("Productos", value: "\(productos.count)")
-                    LabeledContent("Compras", value: "\(compras.count)")
+        if let usuario = sesion.usuario {
+            // Después de registrarse, entra directo a la app
+            NavigationStack {
+                List {
+                    Section("Sesión iniciada") {
+                        LabeledContent("Nombre", value: usuario.nombre)
+                        LabeledContent("Usuario", value: usuario.usuario)
+                        LabeledContent("Rol", value: usuario.rol)
+                    }
+                    Section("Usuarios registrados (\(usuarios.count))") {
+                        ForEach(usuarios) { u in
+                            VStack(alignment: .leading) {
+                                Text("\(u.nombre) · @\(u.usuario) · \(u.rol)")
+                                // Se ve que la clave está guardada como hash, no tal cual
+                                Text("clave: \(u.clave.prefix(16))…")
+                                    .font(.caption.monospaced())
+                                    .foregroundStyle(.secondary)
+                            }
+                        }
+                    }
+                    Button("Cerrar sesión", role: .destructive) { sesion.cerrar() }
                 }
+                .navigationTitle("Compras")
             }
-            .navigationTitle("Compras")
+        } else {
+            NavigationStack {
+                RegistroView()
+            }
         }
     }
 }
 
 #Preview {
     ContentView()
+        .environment(Sesion())
         .modelContainer(for: [Usuario.self, Proveedor.self, Producto.self, Compra.self], inMemory: true)
 }
