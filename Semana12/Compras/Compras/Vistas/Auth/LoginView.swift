@@ -19,12 +19,15 @@ struct LoginView: View {
                 VStack(spacing: 28) {
                     // ① Logo y nombre
                     VStack(spacing: 12) {
-                        Image(systemName: "shippingbox.fill")
-                            .font(.system(size: 40, weight: .semibold))
-                            .foregroundStyle(.white)
-                            .frame(width: 88, height: 88)
+                        // Mismo logo del ícono de la app
+                        Image("LogoCaja")
+                            .resizable()
+                            .scaledToFit()
+                            .frame(width: 46)
+                            .frame(width: 92, height: 92)
                             .background(
-                                LinearGradient(colors: [.indigo, .blue],
+                                LinearGradient(colors: [Color(red: 0.39, green: 0.31, blue: 0.93),
+                                                        Color(red: 0.12, green: 0.51, blue: 1.0)],
                                                startPoint: .topLeading, endPoint: .bottomTrailing),
                                 in: RoundedRectangle(cornerRadius: 22, style: .continuous)
                             )

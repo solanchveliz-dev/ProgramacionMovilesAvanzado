@@ -5,6 +5,7 @@ import Charts
 /// B9 · Resumen del supervisor
 struct ResumenView: View {
     @Environment(Sesion.self) private var sesion
+    @Environment(\.modelContext) private var contexto
     @Query private var productos: [Producto]
     @Query private var proveedores: [Proveedor]
     @Query private var compras: [Compra]
@@ -40,6 +41,9 @@ struct ResumenView: View {
             .filter { $0.total > 0 }
             .sorted { $0.total > $1.total }
     }
+
+    @State private var confirmarDemo = false
+    @State private var resultadoDemo: String?
 
     private var stockBajo: [Producto] { productos.filter { $0.stock <= 5 }.sorted { $0.stock < $1.stock } }
 
@@ -138,7 +142,33 @@ struct ResumenView: View {
             .background(Color(.systemGroupedBackground))
             .navigationTitle("Resumen")
             .toolbar {
-                ToolbarItem(placement: .topBarTrailing) { AvatarMenu() }      // ① Avatar
+                ToolbarItemGroup(placement: .topBarTrailing) {
+                    Menu {
+                        Button {
+                            confirmarDemo = true
+                        } label: {
+                            Label("Cargar datos de demostración", systemImage: "tray.and.arrow.down")
+                        }
+                    } label: {
+                        Image(systemName: "ellipsis.circle")
+                    }
+                    AvatarMenu()                                              // ① Avatar
+                }
+            }
+            .confirmationDialog("¿Cargar datos de demostración?", isPresented: $confirmarDemo, titleVisibility: .visible) {
+                Button("Cargar catálogo de ejemplo") {
+                    let r = DatosDemo.cargar(en: contexto)
+                    resultadoDemo = "Se agregaron \(r.proveedores) proveedores y \(r.productos) productos."
+                }
+                Button("Cancelar", role: .cancel) { }
+            } message: {
+                Text("Agrega 4 proveedores y 7 productos de ejemplo. No borra ni duplica lo que ya existe.")
+            }
+            .alert("Datos cargados",
+                   isPresented: Binding(get: { resultadoDemo != nil }, set: { if !$0 { resultadoDemo = nil } })) {
+                Button("Listo", role: .cancel) { }
+            } message: {
+                Text(resultadoDemo ?? "")
             }
         }
     }
