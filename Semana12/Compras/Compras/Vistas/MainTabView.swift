@@ -8,7 +8,7 @@ struct MainTabView: View {
         if usuario.esSupervisor {
             // Supervisor: Resumen, Aprobar, Por pagar, Productos, Proveedores
             TabView {
-                PantallaPendiente(titulo: "Resumen", icono: "chart.bar.xaxis")
+                ResumenView()
                     .tabItem { Label("Resumen", systemImage: "chart.bar.xaxis") }
                 AprobarView()
                     .tabItem { Label("Aprobar", systemImage: "checkmark.seal") }
