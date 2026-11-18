@@ -12,7 +12,7 @@ struct MainTabView: View {
                     .tabItem { Label("Resumen", systemImage: "chart.bar.xaxis") }
                 AprobarView()
                     .tabItem { Label("Aprobar", systemImage: "checkmark.seal") }
-                PantallaPendiente(titulo: "Por pagar", icono: "creditcard")
+                PorPagarView()
                     .tabItem { Label("Por pagar", systemImage: "creditcard") }
                 ProductosView()
                     .tabItem { Label("Productos", systemImage: "shippingbox") }
