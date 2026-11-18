@@ -1,7 +1,7 @@
 import SwiftUI
 import SwiftData
 
-/// B1 · Iniciar sesión
+/// B1 · Iniciar sesión (fiel a la maqueta)
 struct LoginView: View {
     @Environment(\.modelContext) private var contexto
     @Environment(Sesion.self) private var sesion
@@ -9,32 +9,26 @@ struct LoginView: View {
     @State private var usuario = ""
     @State private var clave = ""
     @State private var error: String?
-    @FocusState private var campo: Campo?
-
-    private enum Campo { case usuario, clave }
 
     var body: some View {
         NavigationStack {
             ScrollView {
-                VStack(spacing: 28) {
+                VStack(spacing: 22) {
                     // ① Logo y nombre
-                    VStack(spacing: 12) {
-                        // Mismo logo del ícono de la app
+                    VStack(spacing: 10) {
                         Image("LogoCaja")
                             .resizable()
                             .scaledToFit()
-                            .frame(width: 46)
-                            .frame(width: 92, height: 92)
+                            .frame(width: 50)
+                            .frame(width: 88, height: 88)
                             .background(
                                 LinearGradient(colors: [Color(red: 0.39, green: 0.31, blue: 0.93),
                                                         Color(red: 0.12, green: 0.51, blue: 1.0)],
                                                startPoint: .topLeading, endPoint: .bottomTrailing),
-                                in: RoundedRectangle(cornerRadius: 22, style: .continuous)
-                            )
-                            .shadow(color: .indigo.opacity(0.3), radius: 12, y: 6)
-                        Text("Compras")
-                            .font(.largeTitle.bold())
-                        Text("Gestión de compras a proveedores")
+                                in: RoundedRectangle(cornerRadius: 22, style: .continuous))
+                        Text("Compras Tecsup")
+                            .font(.title.bold())
+                        Text("Inicia sesión para continuar")
                             .font(.subheadline)
                             .foregroundStyle(.secondary)
                     }
@@ -42,28 +36,16 @@ struct LoginView: View {
 
                     VStack(spacing: 12) {
                         // ② Usuario
-                        HStack {
-                            Image(systemName: "person").foregroundStyle(.secondary).frame(width: 24)
-                            TextField("Usuario", text: $usuario)
+                        CampoEtiquetado("Usuario") {
+                            TextField("Tu usuario", text: $usuario)
                                 .textInputAutocapitalization(.never)
                                 .autocorrectionDisabled()
-                                .focused($campo, equals: .usuario)
-                                .submitLabel(.next)
-                                .onSubmit { campo = .clave }
                         }
-                        .padding()
-                        .background(.background.secondary, in: RoundedRectangle(cornerRadius: 12))
-
                         // ③ Clave oculta
-                        HStack {
-                            Image(systemName: "lock").foregroundStyle(.secondary).frame(width: 24)
-                            SecureField("Clave", text: $clave)
-                                .focused($campo, equals: .clave)
-                                .submitLabel(.go)
+                        CampoEtiquetado("Clave") {
+                            SecureField("Tu clave", text: $clave)
                                 .onSubmit(ingresar)
                         }
-                        .padding()
-                        .background(.background.secondary, in: RoundedRectangle(cornerRadius: 12))
                     }
 
                     // ④ Mensaje de error genérico
@@ -87,7 +69,7 @@ struct LoginView: View {
 
                     // Ⓐ Ir a Crear cuenta
                     HStack(spacing: 4) {
-                        Text("¿No tienes cuenta?").foregroundStyle(.secondary)
+                        Text("¿Primera vez?").foregroundStyle(.secondary)
                         NavigationLink("Crear cuenta") { RegistroView() }
                             .fontWeight(.semibold)
                     }
@@ -96,8 +78,11 @@ struct LoginView: View {
                 .padding(24)
             }
             .scrollDismissesKeyboard(.interactively)
+            .background(Color(.systemGroupedBackground))
+            .navigationTitle("Ingresar")                      // Texto del botón Atrás en Crear cuenta
+            .toolbar(.hidden, for: .navigationBar)
             .onChange(of: usuario) { error = nil }
-            .onChange(of: clave) { error = nil }
+            .onChange(of: clave) { if !clave.isEmpty { error = nil } }
         }
     }
 

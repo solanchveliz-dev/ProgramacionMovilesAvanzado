@@ -1,63 +1,33 @@
 import SwiftUI
 import SwiftData
 
-/// B3 · Productos
+/// B3 · Productos (fiel a la maqueta)
 struct ProductosView: View {
     @Environment(\.modelContext) private var contexto
     @Environment(Sesion.self) private var sesion
     @Query(sort: \Producto.nombre) private var productos: [Producto]
 
     @State private var busqueda = ""
-    @State private var categoria: String?          // nil = Todos
     @State private var mostrarNuevo = false
     @State private var mensajeBloqueo: String?
 
     private var esSupervisor: Bool { sesion.usuario?.esSupervisor ?? false }
 
-    // ② Búsqueda + ③ filtro por categoría
+    // ② Búsqueda
     private var filtrados: [Producto] {
-        productos.filter { p in
-            (categoria == nil || p.categoria == categoria)
-            && (busqueda.isEmpty
-                || p.nombre.localizedCaseInsensitiveContains(busqueda)
-                || p.categoria.localizedCaseInsensitiveContains(busqueda))
+        guard !busqueda.isEmpty else { return productos }
+        return productos.filter {
+            $0.nombre.localizedCaseInsensitiveContains(busqueda)
+                || $0.categoria.localizedCaseInsensitiveContains(busqueda)
         }
     }
 
     // ④ Valor del inventario = Σ stock × costo promedio
     private var valorInventario: Double { productos.reduce(0) { $0 + $1.valorInventario } }
-    private var stockBajo: Int { productos.filter { $0.stock <= 5 }.count }
 
     var body: some View {
         NavigationStack {
             List {
-                // Tarjeta del valor del inventario
-                Section {
-                    TarjetaDestacada(titulo: "Valor del inventario",
-                                     valor: valorInventario.soles,
-                                     detalle: "\(productos.count) productos · \(stockBajo) con stock bajo",
-                                     icono: "shippingbox.fill")
-                }
-                .listRowInsets(EdgeInsets())
-                .listRowBackground(Color.clear)
-
-                // Chips de categoría
-                Section {
-                    ScrollView(.horizontal, showsIndicators: false) {
-                        HStack(spacing: 8) {
-                            ChipFiltro(titulo: "Todos", seleccionado: categoria == nil) { categoria = nil }
-                            ForEach(Categoria.allCases) { c in
-                                ChipFiltro(titulo: c.rawValue, icono: c.icono,
-                                           seleccionado: categoria == c.rawValue) { categoria = c.rawValue }
-                            }
-                        }
-                        .padding(.vertical, 2)
-                    }
-                }
-                .listRowInsets(EdgeInsets())
-                .listRowBackground(Color.clear)
-
-                // Lista de productos
                 Section {
                     if productos.isEmpty {
                         ContentUnavailableView("Sin productos", systemImage: "shippingbox",
@@ -65,29 +35,45 @@ struct ProductosView: View {
                                                                               : "El supervisor aún no registra productos."))
                             .listRowBackground(Color.clear)
                     } else if filtrados.isEmpty {
-                        ContentUnavailableView("Sin resultados", systemImage: "magnifyingglass",
-                                               description: Text("Prueba con otra búsqueda o categoría."))
+                        ContentUnavailableView.search(text: busqueda)
                             .listRowBackground(Color.clear)
                     }
                     ForEach(filtrados) { producto in
                         NavigationLink {
                             ProductoDetalleView(producto: producto)
                         } label: {
-                            FilaProducto(producto: producto)
+                            FilaProducto(producto: producto)          // ③
                         }
-                        .deleteDisabled(!esSupervisor)      // ⑤ Solo el supervisor puede deslizar
+                        .deleteDisabled(!esSupervisor)                 // ⑤ solo supervisor
                     }
                     .onDelete(perform: borrar)
-                } header: {
-                    Text(filtrados.count == 1 ? "1 producto" : "\(filtrados.count) productos")
+                }
+
+                // ④ Valor del inventario
+                if !productos.isEmpty {
+                    Section {
+                        VStack(alignment: .leading, spacing: 4) {
+                            Text("Valor del inventario (stock × costo promedio)")
+                                .font(.caption)
+                                .foregroundStyle(.secondary)
+                            Text(valorInventario.soles)
+                                .font(.title2.bold())
+                                .monospacedDigit()
+                        }
+                        .padding(.vertical, 4)
+                    } footer: {
+                        if esSupervisor {
+                            Text("Desliza para borrar. No se puede borrar un producto que tiene compras.")
+                        }
+                    }
                 }
             }
             .listSectionSpacing(14)
-            .searchable(text: $busqueda, prompt: "Buscar producto o categoría")
+            .searchable(text: $busqueda, prompt: "Buscar")
             .navigationTitle("Productos")
             .toolbar {
                 ToolbarItemGroup(placement: .topBarTrailing) {
-                    if esSupervisor {                       // ① Botón + solo supervisor
+                    if esSupervisor {                                  // ① + solo supervisor
                         Button { mostrarNuevo = true } label: { Image(systemName: "plus") }
                             .accessibilityLabel("Nuevo producto")
                     }
@@ -104,7 +90,7 @@ struct ProductosView: View {
         }
     }
 
-    /// Borrado bloqueado si el producto tiene compras (.deny)
+    /// ⑤ Borrado bloqueado si el producto tiene compras (.deny)
     private func borrar(_ offsets: IndexSet) {
         for index in offsets {
             let producto = filtrados[index]
@@ -118,34 +104,33 @@ struct ProductosView: View {
     }
 }
 
-/// Fila de la lista: foto, nombre, categoría, costo promedio, stock en color y valor
+/// ③ Fila: foto o iniciales, nombre, categoría, costo promedio y stock en color
 struct FilaProducto: View {
     let producto: Producto
 
     var body: some View {
         HStack(spacing: 12) {
-            MiniaturaProducto(foto: producto.foto, categoria: producto.categoria)
-            VStack(alignment: .leading, spacing: 3) {
+            MiniaturaProducto(foto: producto.foto, categoria: producto.categoria, tamano: 44, nombre: producto.nombre)
+            VStack(alignment: .leading, spacing: 2) {
                 Text(producto.nombre)
-                    .font(.body.weight(.semibold))
+                    .font(.subheadline.weight(.semibold))
                     .lineLimit(1)
                 Text(producto.categoria)
                     .font(.caption)
                     .foregroundStyle(.secondary)
-                Text("Costo prom. \(producto.costoPromedio.soles)")
-                    .font(.caption)
+            }
+            Spacer(minLength: 6)
+            VStack(alignment: .trailing, spacing: 1) {
+                Text(producto.costoPromedio.soles)
+                    .font(.subheadline.weight(.bold))
+                    .monospacedDigit()
+                Text("costo prom.")
+                    .font(.caption2)
                     .foregroundStyle(.secondary)
-                    .monospacedDigit()
             }
-            Spacer(minLength: 8)
-            VStack(alignment: .trailing, spacing: 6) {
-                EtiquetaStock(stock: producto.stock)
-                Text(producto.valorInventario.soles)
-                    .font(.caption.weight(.medium))
-                    .monospacedDigit()
-            }
+            EtiquetaStock(stock: producto.stock)
         }
-        .padding(.vertical, 4)
+        .padding(.vertical, 2)
     }
 }
 

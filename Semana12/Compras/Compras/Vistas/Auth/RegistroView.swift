@@ -1,7 +1,7 @@
 import SwiftUI
 import SwiftData
 
-/// B2 · Crear cuenta
+/// B2 · Crear cuenta (fiel a la maqueta)
 struct RegistroView: View {
     @Environment(\.modelContext) private var contexto
     @Environment(Sesion.self) private var sesion
@@ -13,7 +13,6 @@ struct RegistroView: View {
     @State private var rol: Rol = .comprador
     @State private var error: String?
 
-    // ③ Aviso en vivo si el usuario ya existe
     private var usuarioRepetido: Bool { ServicioAuth.existeUsuario(usuario, en: contexto) }
     private var claveCorta: Bool { !clave.isEmpty && clave.count < ServicioAuth.longitudMinimaClave }
     private var noCoinciden: Bool { !confirmacion.isEmpty && clave != confirmacion }
@@ -24,71 +23,52 @@ struct RegistroView: View {
 
     var body: some View {
         ScrollView {
-            VStack(alignment: .leading, spacing: 22) {
-                // ① Encabezado
-                VStack(alignment: .leading, spacing: 6) {
-                    Image("LogoCaja")
-                        .resizable()
-                        .scaledToFit()
-                        .frame(width: 30)
-                        .frame(width: 56, height: 56)
-                        .background(
-                            LinearGradient(colors: [Color(red: 0.39, green: 0.31, blue: 0.93),
-                                                    Color(red: 0.12, green: 0.51, blue: 1.0)],
-                                           startPoint: .topLeading, endPoint: .bottomTrailing),
-                            in: RoundedRectangle(cornerRadius: 15, style: .continuous))
-                    Text("Crea tu cuenta")
-                        .font(.largeTitle.bold())
-                        .padding(.top, 6)
-                    Text("Completa tus datos para empezar a usar Compras.")
-                        .font(.subheadline)
-                        .foregroundStyle(.secondary)
-                }
-
-                // ② Nombre y ③ usuario
-                VStack(alignment: .leading, spacing: 10) {
-                    CampoRegistro(icono: "person", placeholder: "Nombre completo", texto: $nombre)
+            VStack(alignment: .leading, spacing: 12) {
+                // ② Nombre completo
+                CampoEtiquetado("Nombre completo") {
+                    TextField("Ej: Lucía Paredes", text: $nombre)
                         .textInputAutocapitalization(.words)
-                    CampoRegistro(icono: "at", placeholder: "Usuario", texto: $usuario,
-                                  estado: usuario.isEmpty ? .neutro : (usuarioRepetido ? .error : .ok))
-                        .textInputAutocapitalization(.never)
-                        .autocorrectionDisabled()
-                    if usuarioRepetido {
-                        MensajeCampo(texto: "Ese usuario ya existe. Elige otro.", tipo: .error)
-                    } else if !usuario.isEmpty {
-                        MensajeCampo(texto: "Usuario disponible", tipo: .ok)
+                }
+
+                // ③ Usuario único, con aviso si ya existe
+                CampoEtiquetado("Usuario", borde: usuarioRepetido ? .red.opacity(0.7) : .clear) {
+                    HStack {
+                        TextField("Ej: lparedes", text: $usuario)
+                            .textInputAutocapitalization(.never)
+                            .autocorrectionDisabled()
+                        if !usuario.isEmpty {
+                            Label(usuarioRepetido ? "Ya existe" : "Disponible",
+                                  systemImage: usuarioRepetido ? "xmark" : "checkmark")
+                                .font(.caption.weight(.semibold))
+                                .foregroundStyle(usuarioRepetido ? .red : .green)
+                        }
                     }
                 }
 
-                // ④ Clave y confirmación
-                VStack(alignment: .leading, spacing: 10) {
-                    CampoRegistro(icono: "lock", placeholder: "Clave (mínimo 6 caracteres)", texto: $clave,
-                                  seguro: true, estado: claveCorta ? .error : .neutro)
-                    CampoRegistro(icono: "lock.rotation", placeholder: "Confirmar clave", texto: $confirmacion,
-                                  seguro: true,
-                                  estado: confirmacion.isEmpty ? .neutro : (noCoinciden ? .error : .ok))
-                    if claveCorta {
-                        MensajeCampo(texto: "La clave debe tener al menos 6 caracteres.", tipo: .error)
-                    } else if noCoinciden {
-                        MensajeCampo(texto: "Las claves no coinciden.", tipo: .error)
-                    }
+                // ④ Clave (mínimo 6) y su confirmación
+                CampoEtiquetado("Clave (mínimo 6 caracteres)", borde: claveCorta ? .red.opacity(0.7) : .clear) {
+                    SecureField("••••••", text: $clave)
+                }
+                CampoEtiquetado("Confirmar clave", borde: noCoinciden ? .red.opacity(0.7) : .clear) {
+                    SecureField("••••••", text: $confirmacion)
+                }
+                if claveCorta {
+                    aviso("La clave debe tener al menos 6 caracteres.")
+                } else if noCoinciden {
+                    aviso("Las claves no coinciden.")
                 }
 
-                // ⑤ Rol en tarjetas
-                VStack(alignment: .leading, spacing: 10) {
-                    Text("¿Cuál es tu rol?")
-                        .font(.headline)
-                    HStack(spacing: 12) {
-                        TarjetaRol(titulo: "Comprador", detalle: "Registra compras y sigue su estado",
-                                   icono: "cart.fill", color: .teal, seleccionado: rol == .comprador) { rol = .comprador }
-                        TarjetaRol(titulo: "Supervisor", detalle: "Aprueba, paga y administra",
-                                   icono: "checkmark.shield.fill", color: .indigo, seleccionado: rol == .supervisor) { rol = .supervisor }
-                    }
+                // ⑤ Rol: Comprador o Supervisor
+                Text("TU ROL")
+                    .font(.caption2.weight(.semibold))
+                    .foregroundStyle(.secondary)
+                    .padding(.top, 8)
+                Picker("Rol", selection: $rol) {
+                    ForEach(Rol.allCases) { Text($0.rawValue).tag($0) }
                 }
+                .pickerStyle(.segmented)
 
-                if let error {
-                    MensajeCampo(texto: error, tipo: .error)
-                }
+                if let error { aviso(error) }
 
                 // Ⓐ Registrarme
                 Button(action: registrar) {
@@ -100,12 +80,26 @@ struct RegistroView: View {
                 .buttonStyle(.borderedProminent)
                 .controlSize(.large)
                 .disabled(!formularioValido)
+                .padding(.top, 8)
+
+                Text("Al registrarte entrarás directamente a la app con las pestañas de tu rol.")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+                    .multilineTextAlignment(.center)
+                    .frame(maxWidth: .infinity)
             }
-            .padding(24)
+            .padding(20)
         }
         .scrollDismissesKeyboard(.interactively)
         .background(Color(.systemGroupedBackground))
-        .navigationBarTitleDisplayMode(.inline)       // El botón Atrás vuelve al login
+        .navigationTitle("Crear cuenta")              // ① Título; el botón "‹ Ingresar" vuelve al login
+        .navigationBarTitleDisplayMode(.inline)
+    }
+
+    private func aviso(_ texto: String) -> some View {
+        Label(texto, systemImage: "exclamationmark.circle.fill")
+            .font(.footnote.weight(.medium))
+            .foregroundStyle(.red)
     }
 
     private func registrar() {
@@ -116,99 +110,6 @@ struct RegistroView: View {
         } catch {
             self.error = error.localizedDescription
         }
-    }
-}
-
-// MARK: - Piezas del formulario
-
-enum EstadoCampo { case neutro, ok, error }
-
-/// Campo con ícono a la izquierda y borde de color según el estado
-struct CampoRegistro: View {
-    let icono: String
-    let placeholder: String
-    @Binding var texto: String
-    var seguro = false
-    var estado: EstadoCampo = .neutro
-
-    private var colorBorde: Color {
-        switch estado {
-        case .neutro: return .clear
-        case .ok: return .green.opacity(0.6)
-        case .error: return .red.opacity(0.7)
-        }
-    }
-
-    var body: some View {
-        HStack(spacing: 12) {
-            Image(systemName: icono)
-                .foregroundStyle(.secondary)
-                .frame(width: 22)
-            if seguro {
-                SecureField(placeholder, text: $texto)
-            } else {
-                TextField(placeholder, text: $texto)
-            }
-            if estado == .ok {
-                Image(systemName: "checkmark.circle.fill").foregroundStyle(.green)
-            }
-        }
-        .padding(.horizontal, 14)
-        .padding(.vertical, 14)
-        .background(Color(.secondarySystemGroupedBackground), in: RoundedRectangle(cornerRadius: 14, style: .continuous))
-        .overlay(RoundedRectangle(cornerRadius: 14, style: .continuous).stroke(colorBorde, lineWidth: 1.5))
-    }
-}
-
-/// Mensaje pequeño debajo de un campo
-struct MensajeCampo: View {
-    let texto: String
-    let tipo: EstadoCampo
-
-    var body: some View {
-        Label(texto, systemImage: tipo == .ok ? "checkmark.circle.fill" : "exclamationmark.circle.fill")
-            .font(.footnote.weight(.medium))
-            .foregroundStyle(tipo == .ok ? Color.green : Color.red)
-            .padding(.leading, 4)
-    }
-}
-
-/// Tarjeta para elegir el rol
-struct TarjetaRol: View {
-    let titulo: String
-    let detalle: String
-    let icono: String
-    let color: Color
-    let seleccionado: Bool
-    let accion: () -> Void
-
-    var body: some View {
-        Button(action: accion) {
-            VStack(alignment: .leading, spacing: 8) {
-                HStack {
-                    Image(systemName: icono)
-                        .font(.title3)
-                        .foregroundStyle(seleccionado ? .white : color)
-                        .frame(width: 38, height: 38)
-                        .background(seleccionado ? color : color.opacity(0.14),
-                                    in: RoundedRectangle(cornerRadius: 10, style: .continuous))
-                    Spacer()
-                    Image(systemName: seleccionado ? "checkmark.circle.fill" : "circle")
-                        .foregroundStyle(seleccionado ? color : Color.secondary.opacity(0.5))
-                }
-                Text(titulo).font(.subheadline.weight(.semibold)).foregroundStyle(.primary)
-                Text(detalle).font(.caption).foregroundStyle(.secondary)
-                    .multilineTextAlignment(.leading)
-                    .fixedSize(horizontal: false, vertical: true)
-            }
-            .padding(14)
-            .frame(maxWidth: .infinity, alignment: .leading)
-            .background(Color(.secondarySystemGroupedBackground), in: RoundedRectangle(cornerRadius: 16, style: .continuous))
-            .overlay(RoundedRectangle(cornerRadius: 16, style: .continuous)
-                .stroke(seleccionado ? color : .clear, lineWidth: 2))
-        }
-        .buttonStyle(.plain)
-        .animation(.snappy, value: seleccionado)
     }
 }
 

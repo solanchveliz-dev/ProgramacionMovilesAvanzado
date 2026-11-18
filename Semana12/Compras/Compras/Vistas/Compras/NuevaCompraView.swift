@@ -55,25 +55,51 @@ struct NuevaCompraView: View {
 
     private var formulario: some View {
         Form {
-            // ② Proveedor
-            Section("Proveedor") {
+            // ② Proveedor y ③ Producto
+            Section {
                 Picker("Proveedor", selection: $proveedor) {
-                    Text("Elegir…").tag(Proveedor?.none)
+                    Text("Elegir").tag(Proveedor?.none)
                     ForEach(proveedores) { p in
                         Text(p.nombre).tag(Optional(p))
                     }
                 }
-            }
-
-            // ③ Producto
-            Section("Producto") {
+                .pickerStyle(.navigationLink)
                 Picker("Producto", selection: $producto) {
-                    Text("Elegir…").tag(Producto?.none)
+                    Text("Elegir").tag(Producto?.none)
                     ForEach(productos) { p in
                         Text(p.nombre).tag(Optional(p))
                     }
                 }
-                if let producto {
+                .pickerStyle(.navigationLink)
+
+                // ④ Cantidad y costo en recuadros, como en la maqueta
+                HStack {
+                    Text("Cantidad")
+                    Spacer()
+                    TextField("0", value: $cantidad, format: .number)
+                        .keyboardType(.numberPad)
+                        .multilineTextAlignment(.trailing)
+                        .monospacedDigit()
+                        .padding(.horizontal, 10).padding(.vertical, 6)
+                        .frame(width: 96)
+                        .overlay(RoundedRectangle(cornerRadius: 8).stroke(Color(.separator)))
+                }
+                HStack {
+                    Text("Costo unitario")
+                    Spacer()
+                    TextField("0.00", text: $costoTexto)
+                        .keyboardType(.decimalPad)
+                        .multilineTextAlignment(.trailing)
+                        .monospacedDigit()
+                        .padding(.horizontal, 10).padding(.vertical, 6)
+                        .frame(width: 110)
+                        .overlay(RoundedRectangle(cornerRadius: 8).stroke(Color(.separator)))
+                }
+                DatePicker("Fecha de la factura", selection: $fecha, in: ...Date.now, displayedComponents: .date)
+            }
+
+            if let producto {
+                Section {
                     HStack(spacing: 12) {
                         MiniaturaProducto(foto: producto.foto, categoria: producto.categoria, tamano: 44)
                         VStack(alignment: .leading, spacing: 2) {
@@ -87,29 +113,9 @@ struct NuevaCompraView: View {
                 }
             }
 
-            // ④ Cantidad, costo y fecha
-            Section("Detalle") {
-                Stepper(value: $cantidad, in: 1...10_000) {
-                    HStack {
-                        Text("Cantidad")
-                        Spacer()
-                        Text("\(cantidad) u.").monospacedDigit().foregroundStyle(.secondary)
-                    }
-                }
-                HStack {
-                    Text("Costo unitario")
-                    Spacer()
-                    Text("S/").foregroundStyle(.secondary)
-                    TextField("0.00", text: $costoTexto)
-                        .keyboardType(.decimalPad)
-                        .multilineTextAlignment(.trailing)
-                        .frame(maxWidth: 100)
-                }
-                DatePicker("Fecha de la factura", selection: $fecha, in: ...Date.now, displayedComponents: .date)
-            }
-
             // ⑤ Contado o Crédito 30 días
             Section {
+                // ⑤ Contado o Crédito 30 días
                 Picker("Forma de pago", selection: $alCredito) {
                     Text("Contado").tag(false)
                     Text("Crédito 30 días").tag(true)
@@ -118,8 +124,6 @@ struct NuevaCompraView: View {
                 if alCredito {
                     LabeledContent("Vence el", value: ReglasCompra.fechaVencimiento(desde: fecha, alCredito: true).corta)
                 }
-            } header: {
-                Text("Forma de pago")
             }
 
             // Resumen calculado
@@ -143,7 +147,7 @@ struct NuevaCompraView: View {
                         Label {
                             VStack(alignment: .leading, spacing: 2) {
                                 Text("Requiere aprobación").font(.subheadline.weight(.semibold))
-                                Text("El total llega a S/ 5,000.00. El stock y el costo cambian cuando el supervisor la apruebe.")
+                                Text("Supera S/ 5,000: quedará pendiente de aprobación del supervisor. No cambia stock ni costo promedio todavía.")
                                     .font(.footnote)
                             }
                         } icon: {
@@ -151,7 +155,7 @@ struct NuevaCompraView: View {
                         }
                         .foregroundStyle(.orange)
                     }
-                    .listRowBackground(Color.orange.opacity(0.12))
+                    .listRowBackground(Color.yellow.opacity(0.18))
                 }
             }
 

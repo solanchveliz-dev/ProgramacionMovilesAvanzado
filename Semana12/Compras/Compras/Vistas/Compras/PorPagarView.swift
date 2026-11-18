@@ -1,11 +1,11 @@
 import SwiftUI
 import SwiftData
 
-/// B8 · Cuentas por pagar (supervisor)
+/// B8 · Por pagar (fiel a la maqueta)
 struct PorPagarView: View {
     @Environment(\.modelContext) private var contexto
 
-    // #Predicate: solo compras aprobadas y al crédito (las únicas que generan deuda)
+    // #Predicate: solo compras aprobadas al crédito (las únicas que generan deuda)
     @Query(filter: #Predicate<Compra> { $0.estado == "Aprobada" && $0.alCredito == true },
            sort: \Compra.vence)
     private var creditos: [Compra]
@@ -18,21 +18,23 @@ struct PorPagarView: View {
     @State private var filtro: Filtro = .pendientes
     @State private var busqueda = ""
     @State private var porPagar: Compra?
-    @State private var aviso: String?
 
+    /// Pendientes de pago = no pagadas (las vencidas también son pendientes, solo que ya pasó su fecha)
     private var noPagadas: [Compra] { creditos.filter { !$0.pagada } }
     private var vencidas: [Compra] { noPagadas.filter(\.estaVencida) }
+    private var pagadas: [Compra] {
+        creditos.filter(\.pagada).sorted { ($0.fechaPago ?? .distantPast) > ($1.fechaPago ?? .distantPast) }
+    }
 
-    /// ⑤ Total por pagar (pendientes + vencidas)
+    /// ⑤ Total por pagar: aprobadas al crédito y no pagadas
     private var totalPorPagar: Double { noPagadas.reduce(0) { $0 + $1.total } }
-    private var totalVencido: Double { vencidas.reduce(0) { $0 + $1.total } }
 
     private var visibles: [Compra] {
         let base: [Compra]
         switch filtro {
-        case .pendientes: base = noPagadas.filter { !$0.estaVencida }
+        case .pendientes: base = noPagadas
         case .vencidas: base = vencidas
-        case .pagadas: base = creditos.filter(\.pagada).sorted { ($0.fechaPago ?? .distantPast) > ($1.fechaPago ?? .distantPast) }
+        case .pagadas: base = pagadas
         }
         guard !busqueda.isEmpty else { return base }
         return base.filter { $0.proveedor?.nombre.localizedCaseInsensitiveContains(busqueda) ?? false }
@@ -41,23 +43,10 @@ struct PorPagarView: View {
     var body: some View {
         NavigationStack {
             List {
-                Section {
-                    TarjetaDestacada(titulo: "Total por pagar",
-                                     valor: totalPorPagar.soles,
-                                     detalle: vencidas.isEmpty
-                                        ? "\(noPagadas.count) cuenta(s) pendiente(s), ninguna vencida"
-                                        : "\(vencidas.count) vencida(s) por \(totalVencido.soles)",
-                                     icono: "creditcard.fill")
-                }
-                .listRowInsets(EdgeInsets())
-                .listRowBackground(Color.clear)
-
                 // ① Segmented Pendientes / Vencidas / Pagadas
                 Section {
                     Picker("Filtro", selection: $filtro) {
-                        ForEach(Filtro.allCases) { f in
-                            Text(f == .vencidas && !vencidas.isEmpty ? "Vencidas (\(vencidas.count))" : f.rawValue).tag(f)
-                        }
+                        ForEach(Filtro.allCases) { Text($0.rawValue).tag($0) }
                     }
                     .pickerStyle(.segmented)
                 }
@@ -66,35 +55,41 @@ struct PorPagarView: View {
 
                 Section {
                     if visibles.isEmpty {
-                        ContentUnavailableView(mensajeVacio.titulo, systemImage: mensajeVacio.icono,
-                                               description: Text(mensajeVacio.detalle))
+                        ContentUnavailableView(filtro == .pagadas ? "Sin pagos todavía" : "Nada por pagar aquí",
+                                               systemImage: filtro == .pagadas ? "banknote" : "checkmark.circle",
+                                               description: Text(filtro == .vencidas ? "Ninguna cuenta está vencida."
+                                                                 : "No hay compras en esta lista."))
                             .listRowBackground(Color.clear)
                     }
                     ForEach(visibles) { compra in
                         NavigationLink {
                             CompraDetalleView(compra: compra)
                         } label: {
-                            VStack(alignment: .leading, spacing: 6) {
-                                FilaCompra(compra: compra, mostrarComprador: true)
-                                TextoVencimiento(compra: compra)
-                            }
+                            FilaPorPagar(compra: compra)              // ② ③
                         }
                         // ④ Deslizar Pagar (esta pestaña solo existe para el supervisor)
                         .swipeActions(edge: .trailing, allowsFullSwipe: false) {
                             if !compra.pagada {
-                                Button { porPagar = compra } label: {
-                                    Label("Pagar", systemImage: "banknote")
-                                }
-                                .tint(.green)
+                                Button { porPagar = compra } label: { Label("Pagar", systemImage: "banknote") }
+                                    .tint(.green)
                             }
                         }
                     }
-                } header: {
-                    Text(visibles.count == 1 ? "1 cuenta" : "\(visibles.count) cuentas")
-                } footer: {
-                    if filtro != .pagadas && !visibles.isEmpty {
-                        Text("Desliza una fila a la izquierda para registrar el pago.")
+                }
+
+                // ⑤ Total por pagar
+                Section {
+                    VStack(alignment: .leading, spacing: 4) {
+                        Text("Total por pagar")
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                        Text(totalPorPagar.soles)
+                            .font(.title2.bold())
+                            .monospacedDigit()
                     }
+                    .padding(.vertical, 4)
+                } footer: {
+                    Text("Solo cuentan compras aprobadas a crédito y no pagadas. Desliza una fila para pagar.")
                 }
             }
             .listSectionSpacing(14)
@@ -107,73 +102,57 @@ struct PorPagarView: View {
                                 isPresented: Binding(get: { porPagar != nil }, set: { if !$0 { porPagar = nil } }),
                                 titleVisibility: .visible,
                                 presenting: porPagar) { compra in
-                Button("Pagar \(compra.total.soles) a \(compra.proveedor?.nombre ?? "proveedor")") { pagar(compra) }
+                Button("Pagar \(compra.total.soles) a \(compra.proveedor?.nombre ?? "proveedor")") {
+                    try? ReglasCompra.pagar(compra, en: contexto)
+                }
                 Button("Cancelar", role: .cancel) { }
             } message: { compra in
                 Text("\(compra.codigo) pasará a Pagadas y el total por pagar bajará.")
             }
-            .sensoryFeedback(.success, trigger: aviso)
-            .overlay(alignment: .bottom) {
-                if let aviso {
-                    Label(aviso, systemImage: "checkmark.circle.fill")
-                        .font(.subheadline.weight(.semibold))
-                        .padding(.horizontal, 16).padding(.vertical, 10)
-                        .background(.regularMaterial, in: Capsule())
-                        .foregroundStyle(.green)
-                        .padding(.bottom, 12)
-                        .transition(.move(edge: .bottom).combined(with: .opacity))
-                }
-            }
         }
-    }
-
-    private var mensajeVacio: (titulo: String, icono: String, detalle: String) {
-        switch filtro {
-        case .pendientes: return ("Sin cuentas pendientes", "checkmark.circle", "No hay compras al crédito por pagar.")
-        case .vencidas: return ("Nada vencido", "calendar.badge.checkmark", "Todas las cuentas están dentro de plazo.")
-        case .pagadas: return ("Sin pagos todavía", "banknote", "Aquí aparecerán las compras al crédito ya pagadas.")
-        }
-    }
-
-    private func pagar(_ compra: Compra) {
-        let codigo = compra.codigo
-        do {
-            try ReglasCompra.pagar(compra, en: contexto)
-            withAnimation { aviso = "\(codigo) pagada" }
-            Task {
-                try? await Task.sleep(for: .seconds(2.5))
-                withAnimation { aviso = nil }
-            }
-        } catch { }
     }
 }
 
-/// Texto del vencimiento: "Vence en 12 días", "Venció hace 3 días" o "Pagada el ..."
-struct TextoVencimiento: View {
+/// Fila como en la maqueta: iniciales del proveedor, "Producto × cantidad · vence dd/MM", total y VENCIDA
+struct FilaPorPagar: View {
     let compra: Compra
 
-    private var dias: Int {
-        let hoy = Calendar.current.startOfDay(for: .now)
-        let vence = Calendar.current.startOfDay(for: compra.vence)
-        return Calendar.current.dateComponents([.day], from: hoy, to: vence).day ?? 0
-    }
+    private func ddMM(_ fecha: Date) -> String { fecha.formatted(.dateTime.day(.twoDigits).month(.twoDigits)) }
 
     var body: some View {
-        Group {
-            if compra.pagada {
-                Label("Pagada el \(compra.fechaPago?.corta ?? "—")", systemImage: "checkmark.seal.fill")
-                    .foregroundStyle(.green)
-            } else if dias < 0 {
-                Label("Venció el \(compra.vence.corta) · hace \(-dias) día(s)", systemImage: "exclamationmark.triangle.fill")
-                    .foregroundStyle(.red)
-            } else if dias == 0 {
-                Label("Vence hoy", systemImage: "calendar.badge.exclamationmark")
-                    .foregroundStyle(.orange)
-            } else {
-                Label("Vence el \(compra.vence.corta) · en \(dias) día(s)", systemImage: "calendar")
-                    .foregroundStyle(dias <= 5 ? Color.orange : Color.secondary)
+        HStack(spacing: 12) {
+            Iniciales(nombre: compra.proveedor?.nombre ?? "?", tamano: 42)
+            VStack(alignment: .leading, spacing: 2) {
+                Text(compra.proveedor?.nombre ?? "Proveedor")
+                    .font(.subheadline.weight(.semibold))
+                    .lineLimit(1)
+                Text(compra.pagada
+                     ? "\(compra.producto?.nombre ?? "—") × \(compra.cantidad) · pagada \(compra.fechaPago.map(ddMM) ?? "")"
+                     : "\(compra.producto?.nombre ?? "—") × \(compra.cantidad) · vence \(ddMM(compra.vence))")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+                    .lineLimit(1)
+            }
+            Spacer(minLength: 6)
+            VStack(alignment: .trailing, spacing: 4) {
+                Text(compra.total.soles)
+                    .font(.subheadline.weight(.bold))
+                    .monospacedDigit()
+                if compra.estaVencida {                     // ③ Etiqueta VENCIDA
+                    Text("VENCIDA")
+                        .font(.caption2.weight(.heavy))
+                        .padding(.horizontal, 8).padding(.vertical, 3)
+                        .background(Color.red, in: Capsule())
+                        .foregroundStyle(.white)
+                } else if compra.pagada {
+                    Text("Pagada")
+                        .font(.caption2.weight(.bold))
+                        .padding(.horizontal, 8).padding(.vertical, 3)
+                        .background(Color.green, in: Capsule())
+                        .foregroundStyle(.white)
+                }
             }
         }
-        .font(.caption.weight(.medium))
+        .padding(.vertical, 2)
     }
 }

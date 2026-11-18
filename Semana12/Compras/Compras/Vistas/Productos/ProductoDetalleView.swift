@@ -18,7 +18,7 @@ struct ProductoDetalleView: View {
             // Encabezado con foto
             Section {
                 VStack(spacing: 12) {
-                    MiniaturaProducto(foto: producto.foto, categoria: producto.categoria, tamano: 128)
+                    MiniaturaProducto(foto: producto.foto, categoria: producto.categoria, tamano: 128, nombre: producto.nombre)
                         .shadow(color: .black.opacity(0.12), radius: 10, y: 4)
                     Text(producto.nombre)
                         .font(.title2.bold())
@@ -44,6 +44,9 @@ struct ProductoDetalleView: View {
                         .foregroundStyle(.secondary)
                 }
                 ForEach(historial) { compra in
+                    NavigationLink {
+                        CompraDetalleView(compra: compra)
+                    } label: {
                     VStack(alignment: .leading, spacing: 3) {
                         HStack {
                             Text(compra.codigo)
@@ -56,6 +59,7 @@ struct ProductoDetalleView: View {
                         Text("\(compra.cantidad) u. × \(compra.costoUnitario.soles) · \(compra.proveedor?.nombre ?? "—")")
                             .font(.caption)
                             .foregroundStyle(.secondary)
+                    }
                     }
                 }
             }

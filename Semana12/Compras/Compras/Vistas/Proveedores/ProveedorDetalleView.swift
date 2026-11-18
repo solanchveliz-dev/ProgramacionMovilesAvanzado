@@ -39,6 +39,9 @@ struct ProveedorDetalleView: View {
                         .foregroundStyle(.secondary)
                 }
                 ForEach(compras) { compra in
+                    NavigationLink {
+                        CompraDetalleView(compra: compra)
+                    } label: {
                     HStack {
                         VStack(alignment: .leading, spacing: 3) {
                             Text("\(compra.codigo) · \(compra.producto?.nombre ?? "—")")
@@ -52,6 +55,7 @@ struct ProveedorDetalleView: View {
                         Text(compra.total.soles)
                             .font(.subheadline.weight(.medium))
                             .monospacedDigit()
+                    }
                     }
                 }
             }

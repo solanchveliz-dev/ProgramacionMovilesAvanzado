@@ -1,141 +1,90 @@
 import SwiftUI
 import SwiftData
-import Charts
 
-/// B9 · Resumen del supervisor
+/// B9 · Resumen del supervisor (fiel a la maqueta)
 struct ResumenView: View {
-    @Environment(Sesion.self) private var sesion
     @Environment(\.modelContext) private var contexto
     @Query private var productos: [Producto]
-    @Query private var proveedores: [Proveedor]
+    @Query(sort: \Proveedor.nombre) private var proveedores: [Proveedor]
     @Query private var compras: [Compra]
-
-    // MARK: - Cálculos
-    private var inicioMes: Date { Calendar.current.dateInterval(of: .month, for: .now)?.start ?? .now }
-    private var aprobadas: [Compra] { compras.filter { $0.estadoCompra == .aprobada } }
-    private var pendientes: [Compra] { compras.filter { $0.estadoCompra == .pendiente } }
-
-    /// ② Valor del inventario
-    private var valorInventario: Double { productos.reduce(0) { $0 + $1.valorInventario } }
-    /// ③ Crédito fiscal: IGV de las compras aprobadas del mes
-    private var creditoFiscalMes: Double {
-        ReglasCompra.redondear(aprobadas.filter { $0.fecha >= inicioMes }.reduce(0) { $0 + $1.igv })
-    }
-    private var creditoFiscalTotal: Double { ReglasCompra.redondear(aprobadas.reduce(0) { $0 + $1.igv }) }
-    /// Por pagar
-    private var porPagar: Double { aprobadas.filter(\.esPorPagar).reduce(0) { $0 + $1.total } }
-    private var vencidas: [Compra] { aprobadas.filter(\.estaVencida) }
-    /// ④ Por aprobar (cantidad e importe)
-    private var importePorAprobar: Double { pendientes.reduce(0) { $0 + $1.total } }
-
-    /// ⑤ Total comprado por proveedor
-    struct TotalProveedor: Identifiable {
-        let nombre: String
-        let total: Double
-        var id: String { nombre }
-    }
-
-    private var porProveedor: [TotalProveedor] {
-        proveedores
-            .map { TotalProveedor(nombre: $0.nombre, total: $0.totalComprado) }
-            .filter { $0.total > 0 }
-            .sorted { $0.total > $1.total }
-    }
 
     @State private var confirmarDemo = false
     @State private var resultadoDemo: String?
 
-    private var stockBajo: [Producto] { productos.filter { $0.stock <= 5 }.sorted { $0.stock < $1.stock } }
+    private var aprobadas: [Compra] { compras.filter { $0.estadoCompra == .aprobada } }
+    private var pendientes: [Compra] { compras.filter { $0.estadoCompra == .pendiente } }
 
-    private var saludo: String {
-        let hora = Calendar.current.component(.hour, from: .now)
-        return hora < 12 ? "Buenos días" : (hora < 19 ? "Buenas tardes" : "Buenas noches")
+    /// ② Valor del inventario
+    private var inventario: Double { productos.reduce(0) { $0 + $1.valorInventario } }
+    /// ③ Crédito fiscal: IGV de las compras aprobadas
+    private var creditoFiscal: Double { ReglasCompra.redondear(aprobadas.reduce(0) { $0 + $1.igv }) }
+    /// Por pagar: aprobadas al crédito y no pagadas
+    private var porPagar: Double { aprobadas.filter(\.esPorPagar).reduce(0) { $0 + $1.total } }
+    /// ④ Por aprobar: cantidad e importe
+    private var importePorAprobar: Double { pendientes.reduce(0) { $0 + $1.total } }
+
+    /// ⑤ Total comprado por proveedor (mayor primero)
+    private var porProveedor: [Proveedor] {
+        proveedores.filter { $0.totalComprado > 0 }.sorted { $0.totalComprado > $1.totalComprado }
     }
+    private var maximo: Double { porProveedor.first?.totalComprado ?? 1 }
 
     var body: some View {
         NavigationStack {
             ScrollView {
-                VStack(alignment: .leading, spacing: 18) {
-                    // Saludo
-                    VStack(alignment: .leading, spacing: 2) {
-                        Text("\(saludo), \(sesion.usuario?.nombre.split(separator: " ").first.map(String.init) ?? "")")
-                            .font(.title3.weight(.semibold))
-                        Text(Date.now.formatted(.dateTime.weekday(.wide).day().month(.wide)))
-                            .font(.subheadline)
-                            .foregroundStyle(.secondary)
-                    }
-
-                    // ② Valor del inventario
-                    TarjetaDestacada(titulo: "Valor del inventario",
-                                     valor: valorInventario.soles,
-                                     detalle: "\(productos.count) productos · \(stockBajo.count) con stock bajo",
-                                     icono: "shippingbox.fill")
-
-                    // Indicadores
+                VStack(spacing: 12) {
+                    // ② ③ ④ Indicadores
                     LazyVGrid(columns: [GridItem(.flexible(), spacing: 12), GridItem(.flexible(), spacing: 12)], spacing: 12) {
-                        TarjetaIndicador(titulo: "Crédito fiscal (IGV)", valor: creditoFiscalMes.soles,
-                                         detalle: "Este mes · total \(creditoFiscalTotal.soles)",
-                                         icono: "percent", color: .teal)
-                        TarjetaIndicador(titulo: "Por pagar", valor: porPagar.soles,
-                                         detalle: vencidas.isEmpty ? "Ninguna vencida" : "\(vencidas.count) vencida(s)",
-                                         icono: "creditcard.fill", color: vencidas.isEmpty ? .blue : .red)
-                        TarjetaIndicador(titulo: "Por aprobar", valor: importePorAprobar.soles,
-                                         detalle: pendientes.count == 1 ? "1 compra" : "\(pendientes.count) compras",
-                                         icono: "checkmark.seal.fill", color: .orange)
-                        TarjetaIndicador(titulo: "Compras aprobadas", valor: "\(aprobadas.count)",
-                                         detalle: "\(proveedores.count) proveedores",
-                                         icono: "cart.fill", color: .indigo)
+                        TarjetaValor(titulo: "Inventario", valor: inventario.soles)
+                        TarjetaValor(titulo: "Crédito fiscal", valor: creditoFiscal.soles)
+                        TarjetaValor(titulo: "Por pagar", valor: porPagar.soles)
+                        TarjetaValor(titulo: "Por aprobar", valor: "\(pendientes.count)",
+                                     detalle: importePorAprobar.soles, colorDetalle: .orange)
                     }
+
+                    // Ver todas las compras (el supervisor "ve todo")
+                    NavigationLink {
+                        TodasComprasView()
+                    } label: {
+                        HStack {
+                            Label("Ver todas las compras", systemImage: "list.bullet.rectangle.fill")
+                                .font(.subheadline.weight(.semibold))
+                            Spacer()
+                            Text("\(compras.count)")
+                                .font(.subheadline.monospacedDigit())
+                                .foregroundStyle(.secondary)
+                            Image(systemName: "chevron.right")
+                                .font(.caption.weight(.semibold))
+                                .foregroundStyle(.tertiary)
+                        }
+                        .padding(14)
+                        .background(Color(.secondarySystemGroupedBackground), in: RoundedRectangle(cornerRadius: 14, style: .continuous))
+                    }
+                    .buttonStyle(.plain)
 
                     // ⑤ Total comprado por proveedor con barras
                     VStack(alignment: .leading, spacing: 12) {
                         Text("Total comprado por proveedor")
-                            .font(.headline)
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
                         if porProveedor.isEmpty {
                             Text("Aún no hay compras aprobadas.")
                                 .font(.subheadline)
                                 .foregroundStyle(.secondary)
-                                .frame(maxWidth: .infinity, minHeight: 80)
-                        } else {
-                            Chart(porProveedor) { item in
-                                BarMark(x: .value("Total", item.total),
-                                        y: .value("Proveedor", item.nombre))
-                                    .foregroundStyle(Color.indigo.gradient)
-                                    .cornerRadius(6)
-                                    .annotation(position: .trailing) {
-                                        Text(item.total.soles)
-                                            .font(.caption2.weight(.semibold))
-                                            .foregroundStyle(.secondary)
-                                    }
+                        }
+                        ForEach(porProveedor) { proveedor in
+                            VStack(alignment: .leading, spacing: 5) {
+                                (Text(proveedor.nombre).bold() + Text(" · \(proveedor.totalComprado.soles)").foregroundColor(.secondary))
+                                    .font(.footnote)
+                                    .lineLimit(1)
+                                ProgressView(value: proveedor.totalComprado, total: maximo)
+                                    .tint(.green)
                             }
-                            .chartXAxis(.hidden)
-                            .chartYAxis {
-                                AxisMarks { _ in AxisValueLabel().font(.caption) }
-                            }
-                            .frame(height: CGFloat(max(porProveedor.count, 1)) * 44 + 10)
                         }
                     }
-                    .padding(16)
-                    .background(Color(.secondarySystemGroupedBackground), in: RoundedRectangle(cornerRadius: 20, style: .continuous))
-
-                    // Stock bajo
-                    if !stockBajo.isEmpty {
-                        VStack(alignment: .leading, spacing: 10) {
-                            Label("Productos con stock bajo", systemImage: "exclamationmark.triangle.fill")
-                                .font(.headline)
-                                .foregroundStyle(.red)
-                            ForEach(stockBajo) { p in
-                                HStack(spacing: 10) {
-                                    MiniaturaProducto(foto: p.foto, categoria: p.categoria, tamano: 36)
-                                    Text(p.nombre).font(.subheadline).lineLimit(1)
-                                    Spacer()
-                                    EtiquetaStock(stock: p.stock)
-                                }
-                            }
-                        }
-                        .padding(16)
-                        .background(Color(.secondarySystemGroupedBackground), in: RoundedRectangle(cornerRadius: 20, style: .continuous))
-                    }
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .padding(14)
+                    .background(Color(.secondarySystemGroupedBackground), in: RoundedRectangle(cornerRadius: 14, style: .continuous))
                 }
                 .padding()
             }
@@ -144,15 +93,13 @@ struct ResumenView: View {
             .toolbar {
                 ToolbarItemGroup(placement: .topBarTrailing) {
                     Menu {
-                        Button {
-                            confirmarDemo = true
-                        } label: {
+                        Button { confirmarDemo = true } label: {
                             Label("Cargar datos de demostración", systemImage: "tray.and.arrow.down")
                         }
                     } label: {
                         Image(systemName: "ellipsis.circle")
                     }
-                    AvatarMenu()                                              // ① Avatar
+                    AvatarMenu()                                              // ①
                 }
             }
             .confirmationDialog("¿Cargar datos de demostración?", isPresented: $confirmarDemo, titleVisibility: .visible) {
@@ -171,37 +118,6 @@ struct ResumenView: View {
                 Text(resultadoDemo ?? "")
             }
         }
-    }
-}
-
-/// Tarjeta de indicador con ícono de color
-struct TarjetaIndicador: View {
-    let titulo: String
-    let valor: String
-    let detalle: String
-    let icono: String
-    let color: Color
-
-    var body: some View {
-        VStack(alignment: .leading, spacing: 8) {
-            Image(systemName: icono)
-                .font(.subheadline.weight(.semibold))
-                .foregroundStyle(color)
-                .frame(width: 32, height: 32)
-                .background(color.opacity(0.14), in: RoundedRectangle(cornerRadius: 9, style: .continuous))
-            Text(valor)
-                .font(.headline)
-                .monospacedDigit()
-                .lineLimit(1)
-                .minimumScaleFactor(0.6)
-            VStack(alignment: .leading, spacing: 1) {
-                Text(titulo).font(.caption.weight(.semibold))
-                Text(detalle).font(.caption2).foregroundStyle(.secondary).lineLimit(1)
-            }
-        }
-        .frame(maxWidth: .infinity, alignment: .leading)
-        .padding(14)
-        .background(Color(.secondarySystemGroupedBackground), in: RoundedRectangle(cornerRadius: 18, style: .continuous))
     }
 }
 

@@ -1,11 +1,11 @@
 import SwiftUI
 import SwiftData
 
-/// B7 · Aprobar compras desde S/ 5,000 (supervisor)
+/// B7 · Aprobar compras desde S/ 5,000 (fiel a la maqueta)
 struct AprobarView: View {
     @Environment(\.modelContext) private var contexto
 
-    // Consulta con #Predicate: solo las compras pendientes, las más antiguas primero
+    // #Predicate: solo las pendientes, las más antiguas primero
     @Query(filter: #Predicate<Compra> { $0.estado == "Pendiente" }, sort: \Compra.fecha)
     private var pendientes: [Compra]
 
@@ -14,18 +14,10 @@ struct AprobarView: View {
     @State private var aviso: String?
     @State private var error: String?
 
-    private var importe: Double { pendientes.reduce(0) { $0 + $1.total } }
-
     var body: some View {
         NavigationStack {
             ScrollView {
-                VStack(spacing: 16) {
-                    TarjetaDestacada(titulo: "Por aprobar",
-                                     valor: importe.soles,
-                                     detalle: pendientes.count == 1 ? "1 compra esperando tu revisión"
-                                                                    : "\(pendientes.count) compras esperando tu revisión",
-                                     icono: "checkmark.seal.fill")
-
+                VStack(alignment: .leading, spacing: 14) {
                     if let aviso {
                         Label(aviso, systemImage: "checkmark.circle.fill")
                             .font(.subheadline.weight(.medium))
@@ -33,19 +25,24 @@ struct AprobarView: View {
                             .frame(maxWidth: .infinity, alignment: .leading)
                             .padding(12)
                             .background(Color.green.opacity(0.12), in: RoundedRectangle(cornerRadius: 12))
-                            .transition(.move(edge: .top).combined(with: .opacity))
                     }
 
                     if pendientes.isEmpty {
                         ContentUnavailableView("Todo al día", systemImage: "checkmark.seal",
-                                               description: Text("No hay compras pendientes de aprobación."))
-                            .padding(.top, 40)
+                                               description: Text("No hay compras de S/ 5,000 o más esperando aprobación."))
+                            .padding(.top, 60)
                     }
 
                     ForEach(pendientes) { compra in
-                        TarjetaAprobacion(compra: compra,
+                        TarjetaAprobacion(compra: compra,                // ②
                                           aprobar: { porAprobar = compra },
                                           rechazar: { porRechazar = compra })
+                    }
+
+                    if !pendientes.isEmpty {
+                        Text("Al rechazar se pide un motivo, que el comprador verá en \"Mis compras\".")
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
                     }
                 }
                 .padding()
@@ -53,9 +50,8 @@ struct AprobarView: View {
             .background(Color(.systemGroupedBackground))
             .navigationTitle("Aprobar")
             .toolbar {
-                ToolbarItem(placement: .topBarTrailing) { AvatarMenu() }      // ① Avatar
+                ToolbarItem(placement: .topBarTrailing) { AvatarMenu() }      // ①
             }
-            // ④ Aprobar con confirmación
             .confirmationDialog("¿Aprobar esta compra?",
                                 isPresented: Binding(get: { porAprobar != nil }, set: { if !$0 { porAprobar = nil } }),
                                 titleVisibility: .visible,
@@ -63,9 +59,8 @@ struct AprobarView: View {
                 Button("Aprobar \(compra.codigo) · \(compra.total.soles)") { aprobar(compra) }
                 Button("Cancelar", role: .cancel) { }
             } message: { _ in
-                Text("Se actualizarán el stock y el costo promedio, y pasará a cuentas por pagar si es al crédito.")
+                Text("Se actualizarán el stock y el costo promedio.")
             }
-            // ④ Rechazar pide motivo
             .sheet(item: $porRechazar) { compra in
                 RechazoView(compra: compra) { motivo in rechazar(compra, motivo: motivo) }
             }
@@ -84,9 +79,7 @@ struct AprobarView: View {
             let codigo = compra.codigo
             try ReglasCompra.aprobar(compra, en: contexto)
             mostrarAviso("\(codigo) aprobada")
-        } catch {
-            self.error = error.localizedDescription
-        }
+        } catch { self.error = error.localizedDescription }
     }
 
     private func rechazar(_ compra: Compra, motivo: String) {
@@ -94,9 +87,7 @@ struct AprobarView: View {
             let codigo = compra.codigo
             try ReglasCompra.rechazar(compra, motivo: motivo, en: contexto)
             mostrarAviso("\(codigo) rechazada")
-        } catch {
-            self.error = error.localizedDescription
-        }
+        } catch { self.error = error.localizedDescription }
     }
 
     private func mostrarAviso(_ texto: String) {
@@ -108,7 +99,7 @@ struct AprobarView: View {
     }
 }
 
-/// ② Tarjeta de la compra pendiente con quién la solicitó y ③ vista previa del efecto
+/// ② Tarjeta de la compra pendiente con quién la solicitó · ③ vista previa · ④ botones
 struct TarjetaAprobacion: View {
     let compra: Compra
     let aprobar: () -> Void
@@ -116,94 +107,68 @@ struct TarjetaAprobacion: View {
 
     private var stockAntes: Int { compra.producto?.stock ?? 0 }
     private var costoAntes: Double { compra.producto?.costoPromedio ?? 0 }
-    private var stockDespues: Int { stockAntes + compra.cantidad }
     private var costoDespues: Double {
         ReglasCompra.nuevoCostoPromedio(stock: stockAntes, costoPromedio: costoAntes,
                                         cantidad: compra.cantidad, costoUnitario: compra.costoUnitario)
     }
+    private func ddMM(_ fecha: Date) -> String { fecha.formatted(.dateTime.day(.twoDigits).month(.twoDigits)) }
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 14) {
-            // Quién la solicitó
-            HStack(spacing: 10) {
-                Text(compra.comprador?.iniciales ?? "?")
-                    .font(.caption.bold())
-                    .foregroundStyle(.white)
-                    .frame(width: 32, height: 32)
-                    .background(Circle().fill(Color.teal))
-                VStack(alignment: .leading, spacing: 1) {
-                    Text("Solicitada por \(compra.comprador?.nombre ?? "—")")
-                        .font(.subheadline.weight(.semibold))
-                    Text("\(compra.codigo) · \(compra.fecha.corta)")
-                        .font(.caption.monospacedDigit())
+        VStack(alignment: .leading, spacing: 10) {
+            HStack(alignment: .top) {
+                VStack(alignment: .leading, spacing: 2) {
+                    Text("\(compra.proveedor?.nombre ?? "—") · \(compra.producto?.nombre ?? "—")")
+                        .font(.subheadline.weight(.bold))
+                    Text("Solicitó: \(compra.comprador?.nombre ?? "—") · \(ddMM(compra.fecha))")
+                        .font(.caption)
                         .foregroundStyle(.secondary)
                 }
                 Spacer()
-                InsigniaEstado(compra: compra)
+                Text("Pendiente")
+                    .font(.caption2.weight(.bold))
+                    .padding(.horizontal, 8).padding(.vertical, 4)
+                    .background(Color.orange, in: Capsule())
+                    .foregroundStyle(.white)
             }
 
-            Divider()
-
-            // Producto y monto
-            HStack(spacing: 12) {
-                MiniaturaProducto(foto: compra.producto?.foto, categoria: compra.producto?.categoria ?? "", tamano: 50)
-                VStack(alignment: .leading, spacing: 2) {
-                    Text(compra.producto?.nombre ?? "Producto").font(.subheadline.weight(.semibold))
-                    Text(compra.proveedor?.nombre ?? "Proveedor").font(.caption).foregroundStyle(.secondary)
-                    Text("\(compra.cantidad) u. × \(compra.costoUnitario.soles) · \(compra.alCredito ? "Crédito 30 días" : "Contado")")
-                        .font(.caption).foregroundStyle(.secondary)
-                }
-                Spacer()
-                VStack(alignment: .trailing, spacing: 2) {
-                    Text(compra.total.soles).font(.headline).monospacedDigit()
-                    Text("IGV \(compra.igv.soles)").font(.caption2).foregroundStyle(.secondary)
-                }
+            VStack(alignment: .leading, spacing: 3) {
+                Text("\(compra.cantidad) u. × \(compra.costoUnitario.soles) = \(compra.subtotal.soles)")
+                Text("IGV 18 % \(compra.igv.soles) · ") + Text("Total \(compra.total.soles)").bold()
+                Text(compra.alCredito ? "Crédito 30 días · vence \(ddMM(compra.vence))" : "Contado")
             }
+            .font(.footnote)
+            .monospacedDigit()
 
-            // Vista previa: antes → después
-            VStack(spacing: 8) {
-                FilaAntesDespues(titulo: "Stock", antes: "\(stockAntes) u.", despues: "\(stockDespues) u.")
-                FilaAntesDespues(titulo: "Costo promedio", antes: costoAntes.soles, despues: costoDespues.soles)
+            // ③ Vista previa del efecto
+            VStack(alignment: .leading, spacing: 3) {
+                Text("Si apruebas: ") + Text("stock \(stockAntes) → \(stockAntes + compra.cantidad)").bold()
+                Text("Costo promedio ") + Text("\(costoAntes.soles) → \(costoDespues.soles)").bold()
             }
-            .padding(12)
-            .background(Color.indigo.opacity(0.07), in: RoundedRectangle(cornerRadius: 12))
+            .font(.footnote)
+            .monospacedDigit()
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .padding(10)
+            .background(Color(.systemGray6), in: RoundedRectangle(cornerRadius: 10))
 
-            // Botones
+            // ④ Rechazar (pide motivo) o Aprobar
             HStack(spacing: 10) {
-                Button(role: .destructive, action: rechazar) {
-                    Label("Rechazar", systemImage: "xmark")
-                        .frame(maxWidth: .infinity).padding(.vertical, 4)
+                Button(action: rechazar) {
+                    Text("Rechazar").fontWeight(.semibold)
+                        .frame(maxWidth: .infinity).padding(.vertical, 6)
                 }
                 .buttonStyle(.bordered)
                 .tint(.red)
 
                 Button(action: aprobar) {
-                    Label("Aprobar", systemImage: "checkmark")
-                        .fontWeight(.semibold)
-                        .frame(maxWidth: .infinity).padding(.vertical, 4)
+                    Text("Aprobar").fontWeight(.semibold)
+                        .frame(maxWidth: .infinity).padding(.vertical, 6)
                 }
                 .buttonStyle(.borderedProminent)
                 .tint(.green)
             }
         }
-        .padding(16)
-        .background(Color(.secondarySystemGroupedBackground), in: RoundedRectangle(cornerRadius: 20, style: .continuous))
-    }
-}
-
-struct FilaAntesDespues: View {
-    let titulo: String
-    let antes: String
-    let despues: String
-
-    var body: some View {
-        HStack {
-            Text(titulo).font(.caption).foregroundStyle(.secondary)
-            Spacer()
-            Text(antes).font(.caption.monospacedDigit()).foregroundStyle(.secondary)
-            Image(systemName: "arrow.right").font(.caption2).foregroundStyle(.indigo)
-            Text(despues).font(.caption.weight(.semibold).monospacedDigit()).foregroundStyle(.indigo)
-        }
+        .padding(14)
+        .background(Color(.secondarySystemGroupedBackground), in: RoundedRectangle(cornerRadius: 16, style: .continuous))
     }
 }
 
@@ -216,7 +181,6 @@ struct RechazoView: View {
     @State private var motivo = ""
     private let sugerencias = ["Precio por encima del mercado", "Excede el presupuesto del mes",
                                "Proveedor no homologado", "Stock suficiente por ahora"]
-
     private var motivoVacio: Bool { motivo.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty }
 
     var body: some View {
@@ -243,9 +207,7 @@ struct RechazoView: View {
             .navigationTitle("Rechazar compra")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
-                ToolbarItem(placement: .cancellationAction) {
-                    Button("Cancelar") { dismiss() }
-                }
+                ToolbarItem(placement: .cancellationAction) { Button("Cancelar") { dismiss() } }
                 ToolbarItem(placement: .confirmationAction) {
                     Button("Rechazar", role: .destructive) {
                         confirmar(motivo)
