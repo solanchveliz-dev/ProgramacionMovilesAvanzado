@@ -16,7 +16,7 @@ struct MainTabView: View {
                     .tabItem { Label("Por pagar", systemImage: "creditcard") }
                 ProductosView()
                     .tabItem { Label("Productos", systemImage: "shippingbox") }
-                PantallaPendiente(titulo: "Proveedores", icono: "building.2")
+                ProveedoresView()
                     .tabItem { Label("Proveedores", systemImage: "building.2") }
             }
         } else {
@@ -24,7 +24,7 @@ struct MainTabView: View {
             TabView {
                 ProductosView()
                     .tabItem { Label("Productos", systemImage: "shippingbox") }
-                PantallaPendiente(titulo: "Proveedores", icono: "building.2")
+                ProveedoresView()
                     .tabItem { Label("Proveedores", systemImage: "building.2") }
                 PantallaPendiente(titulo: "Nueva compra", icono: "cart.badge.plus")
                     .tabItem { Label("Compra", systemImage: "cart.badge.plus") }
