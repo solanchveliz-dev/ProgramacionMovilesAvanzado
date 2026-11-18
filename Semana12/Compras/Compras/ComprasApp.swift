@@ -10,6 +10,7 @@ struct ComprasApp: App {
         WindowGroup {
             RootView()          // Login o app, según la sesión
                 .environment(sesion)
+                .tint(.indigo)  // Color de marca en toda la app
         }
         .modelContainer(ContenedorDatos.shared.container)
     }
