@@ -1,6 +1,33 @@
 import SwiftUI
 import UIKit
 
+// MARK: - Colores de marca (un solo lugar para toda la app)
+
+extension Color {
+    static let marcaInicio = Color(red: 0.06, green: 0.22, blue: 0.28)
+    static let marcaFin = Color(red: 0.13, green: 0.43, blue: 0.49)
+}
+
+/// Color principal: azul petróleo (como la maqueta).
+/// Se puede usar como Color.marca o .marca (en foregroundStyle, tint, etc.)
+extension ShapeStyle where Self == Color {
+    static var marca: Color { Color(red: 0.11, green: 0.33, blue: 0.40) }
+}
+
+extension LinearGradient {
+    /// Degradado de marca (splash, login, tarjetas destacadas)
+    static var marca: LinearGradient {
+        LinearGradient(colors: [.marcaInicio, .marcaFin], startPoint: .topLeading, endPoint: .bottomTrailing)
+    }
+}
+
+/// Sombra suave y elegante para tarjetas
+extension View {
+    func sombraSuave() -> some View {
+        shadow(color: .black.opacity(0.06), radius: 10, x: 0, y: 4)
+    }
+}
+
 // MARK: - Componentes visuales reutilizables de toda la app
 
 /// Nivel de stock: verde más de 10 · ámbar de 6 a 10 · rojo 5 o menos
@@ -93,9 +120,9 @@ struct MiniaturaProducto: View {
         } else {
             Image(systemName: Categoria.icono(de: categoria))
                 .font(.system(size: tamano * 0.40, weight: .medium))
-                .foregroundStyle(.indigo)
+                .foregroundStyle(.marca)
                 .frame(width: tamano, height: tamano)
-                .background(Color.indigo.opacity(0.14), in: RoundedRectangle(cornerRadius: tamano * 0.26, style: .continuous))
+                .background(Color.marca.opacity(0.12), in: RoundedRectangle(cornerRadius: tamano * 0.26, style: .continuous))
         }
     }
 }
@@ -117,7 +144,10 @@ struct ChipFiltro: View {
             .padding(.horizontal, 14)
             .padding(.vertical, 8)
             .background(seleccionado ? Color.accentColor : Color(.secondarySystemGroupedBackground), in: Capsule())
+            .overlay(Capsule().stroke(seleccionado ? Color.clear : Color(.separator).opacity(0.4), lineWidth: 1))
             .foregroundStyle(seleccionado ? Color.white : Color.primary)
+            .shadow(color: seleccionado ? Color.accentColor.opacity(0.3) : .clear, radius: 6, x: 0, y: 3)
+            .animation(.snappy(duration: 0.2), value: seleccionado)
         }
         .buttonStyle(.plain)
     }
@@ -140,8 +170,16 @@ struct TarjetaDestacada: View {
         .foregroundStyle(.white)
         .padding(20)
         .frame(maxWidth: .infinity, alignment: .leading)
-        .background(LinearGradient(colors: [.indigo, .blue], startPoint: .topLeading, endPoint: .bottomTrailing),
-                    in: RoundedRectangle(cornerRadius: 22, style: .continuous))
+        .background(alignment: .topTrailing) {
+            ZStack(alignment: .topTrailing) {
+                RoundedRectangle(cornerRadius: 22, style: .continuous).fill(LinearGradient.marca)
+                // Círculos decorativos, como en apps bancarias
+                Circle().fill(.white.opacity(0.10)).frame(width: 140, height: 140).offset(x: 50, y: -50)
+                Circle().fill(.white.opacity(0.07)).frame(width: 90, height: 90).offset(x: -10, y: 40)
+            }
+            .clipShape(RoundedRectangle(cornerRadius: 22, style: .continuous))
+        }
+        .shadow(color: Color.marcaInicio.opacity(0.35), radius: 14, x: 0, y: 8)
     }
 }
 
@@ -159,7 +197,7 @@ struct TarjetaValor: View {
                 .foregroundStyle(.secondary)
             HStack(alignment: .firstTextBaseline, spacing: 6) {
                 Text(valor)
-                    .font(.title3.weight(.bold))
+                    .font(.system(.title3, design: .rounded, weight: .bold))
                     .monospacedDigit()
                     .lineLimit(1)
                     .minimumScaleFactor(0.6)
@@ -173,7 +211,8 @@ struct TarjetaValor: View {
         }
         .frame(maxWidth: .infinity, alignment: .leading)
         .padding(14)
-        .background(Color(.secondarySystemGroupedBackground), in: RoundedRectangle(cornerRadius: 14, style: .continuous))
+        .background(Color(.secondarySystemGroupedBackground), in: RoundedRectangle(cornerRadius: 16, style: .continuous))
+        .sombraSuave()
     }
 }
 
@@ -199,7 +238,92 @@ struct CampoEtiquetado<Contenido: View>: View {
         .padding(.horizontal, 14)
         .padding(.vertical, 10)
         .frame(maxWidth: .infinity, alignment: .leading)
-        .background(Color(.secondarySystemGroupedBackground), in: RoundedRectangle(cornerRadius: 12, style: .continuous))
-        .overlay(RoundedRectangle(cornerRadius: 12, style: .continuous).stroke(borde, lineWidth: 1.5))
+        .background(Color(.secondarySystemGroupedBackground), in: RoundedRectangle(cornerRadius: 14, style: .continuous))
+        .overlay(
+            RoundedRectangle(cornerRadius: 14, style: .continuous)
+                .stroke(borde == .clear ? Color(.separator).opacity(0.35) : borde,
+                        lineWidth: borde == .clear ? 1 : 1.5)
+        )
+    }
+}
+
+/// Ícono cuadrado de color para las filas de formularios (estilo Ajustes de iPhone)
+struct IconoFila: View {
+    let nombre: String
+    var color: Color = .marca
+
+    var body: some View {
+        Image(systemName: nombre)
+            .font(.system(size: 13, weight: .semibold))
+            .foregroundStyle(.white)
+            .frame(width: 28, height: 28)
+            .background(color.gradient, in: RoundedRectangle(cornerRadius: 7, style: .continuous))
+    }
+}
+
+/// Texto con su ícono de color a la izquierda (para usar como etiqueta de una fila)
+struct EtiquetaFila: View {
+    let titulo: String
+    let icono: String
+    var color: Color = .marca
+
+    init(_ titulo: String, icono: String, color: Color = .marca) {
+        self.titulo = titulo
+        self.icono = icono
+        self.color = color
+    }
+
+    var body: some View {
+        Label {
+            Text(titulo)
+        } icon: {
+            IconoFila(nombre: icono, color: color)
+        }
+    }
+}
+
+/// Campo de clave con botón de ojo para mostrar u ocultar (como en apps reales)
+struct CampoClave: View {
+    let placeholder: String
+    @Binding var texto: String
+    var icono: String = "lock.fill"
+    var alEnviar: () -> Void = {}
+
+    @State private var visible = false
+
+    var body: some View {
+        HStack(spacing: 10) {
+            Image(systemName: icono).foregroundStyle(.secondary)
+            Group {
+                if visible {
+                    TextField(placeholder, text: $texto)
+                        .textInputAutocapitalization(.never)
+                        .autocorrectionDisabled()
+                } else {
+                    SecureField(placeholder, text: $texto)
+                }
+            }
+            .onSubmit(alEnviar)
+            Button {
+                visible.toggle()
+            } label: {
+                Image(systemName: visible ? "eye.slash" : "eye")
+                    .foregroundStyle(.secondary)
+            }
+            .buttonStyle(.plain)
+            .accessibilityLabel(visible ? "Ocultar clave" : "Mostrar clave")
+        }
+    }
+}
+
+/// Subtítulo debajo del título de la pantalla (iOS 26). En versiones anteriores no hace nada.
+extension View {
+    @ViewBuilder
+    func subtitulo(_ texto: String) -> some View {
+        if #available(iOS 26.0, *) {
+            self.navigationSubtitle(texto)
+        } else {
+            self
+        }
     }
 }

@@ -6,9 +6,7 @@ struct SplashView: View {
 
     var body: some View {
         ZStack {
-            LinearGradient(colors: [Color(red: 0.39, green: 0.31, blue: 0.93),
-                                    Color(red: 0.12, green: 0.51, blue: 1.0)],
-                           startPoint: .topLeading, endPoint: .bottomTrailing)
+            LinearGradient.marca
                 .ignoresSafeArea()
 
             VStack(spacing: 18) {

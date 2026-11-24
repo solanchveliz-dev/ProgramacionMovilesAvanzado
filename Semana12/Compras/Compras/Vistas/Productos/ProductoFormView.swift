@@ -36,14 +36,14 @@ struct ProductoFormView: View {
                                 Image(systemName: "camera.circle.fill")
                                     .font(.system(size: 30))
                                     .symbolRenderingMode(.palette)
-                                    .foregroundStyle(.white, .indigo)
+                                    .foregroundStyle(.white, Color.marca)
                                     .offset(x: 8, y: 8)
                             }
                         }
                         .buttonStyle(.plain)
                         Text(foto == nil ? "Agregar foto" : "Cambiar foto")
                             .font(.footnote.weight(.medium))
-                            .foregroundStyle(.indigo)
+                            .foregroundStyle(.marca)
                         if foto != nil {
                             Button("Quitar foto", role: .destructive) {
                                 foto = nil
@@ -57,25 +57,30 @@ struct ProductoFormView: View {
                 .listRowBackground(Color.clear)
 
                 Section("Datos") {
-                    TextField("Nombre del producto", text: $nombre)
-                        .textInputAutocapitalization(.words)
-                    Picker("Categoría", selection: $categoria) {
+                    HStack(spacing: 12) {
+                        IconoFila(nombre: "shippingbox.fill", color: .orange)
+                        TextField("Nombre del producto", text: $nombre)
+                            .textInputAutocapitalization(.words)
+                    }
+                    Picker(selection: $categoria) {
                         ForEach(Categoria.allCases) { c in
                             Label(c.rawValue, systemImage: c.icono).tag(c.rawValue)
                         }
+                    } label: {
+                        EtiquetaFila("Categoría", icono: "square.grid.2x2.fill", color: .purple)
                     }
                 }
 
                 Section {
                     Stepper(value: $stock, in: 0...100_000) {
                         HStack {
-                            Text("Stock")
+                            EtiquetaFila("Stock", icono: "cube.box.fill", color: .teal)
                             Spacer()
                             Text("\(stock) u.").monospacedDigit().foregroundStyle(.secondary)
                         }
                     }
                     HStack {
-                        Text("Costo promedio")
+                        EtiquetaFila("Costo promedio", icono: "dollarsign", color: .green)
                         Spacer()
                         Text("S/").foregroundStyle(.secondary)
                         TextField("0.00", text: $costoTexto)

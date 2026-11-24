@@ -38,19 +38,25 @@ struct ProveedorFormView: View {
                 .listRowBackground(Color.clear)
 
                 Section("Razón social") {
-                    TextField("Ej: Distribuidora Andina S.A.C.", text: $nombre)
-                        .textInputAutocapitalization(.words)
+                    HStack(spacing: 12) {
+                        IconoFila(nombre: "building.2.fill", color: .blue)
+                        TextField("Ej: Distribuidora Andina S.A.C.", text: $nombre)
+                            .textInputAutocapitalization(.words)
+                    }
                 }
 
                 Section {
-                    TextField("11 dígitos", text: $ruc)
-                        .keyboardType(.numberPad)
-                        .monospacedDigit()
-                        .onChange(of: ruc) {
-                            // Solo números y máximo 11
-                            let limpio = String(ruc.filter(\.isNumber).prefix(11))
-                            if limpio != ruc { ruc = limpio }
-                        }
+                    HStack(spacing: 12) {
+                        IconoFila(nombre: "number.square.fill", color: .teal)
+                        TextField("11 dígitos", text: $ruc)
+                            .keyboardType(.numberPad)
+                            .monospacedDigit()
+                            .onChange(of: ruc) {
+                                // Solo números y máximo 11
+                                let limpio = String(ruc.filter(\.isNumber).prefix(11))
+                                if limpio != ruc { ruc = limpio }
+                            }
+                    }
                 } header: {
                     Text("RUC")
                 } footer: {

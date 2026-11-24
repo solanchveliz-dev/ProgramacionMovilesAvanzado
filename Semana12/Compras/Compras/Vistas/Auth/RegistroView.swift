@@ -24,15 +24,36 @@ struct RegistroView: View {
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 12) {
+                // Encabezado
+                HStack(spacing: 14) {
+                    Image(systemName: "person.crop.circle.badge.plus")
+                        .font(.system(size: 26, weight: .semibold))
+                        .foregroundStyle(.white)
+                        .frame(width: 56, height: 56)
+                        .background(LinearGradient.marca, in: RoundedRectangle(cornerRadius: 16, style: .continuous))
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text("Crea tu cuenta")
+                            .font(.system(.title2, design: .rounded, weight: .bold))
+                        Text("Regístrate para acceder al sistema")
+                            .font(.subheadline)
+                            .foregroundStyle(.secondary)
+                    }
+                }
+                .padding(.bottom, 10)
+
                 // ② Nombre completo
                 CampoEtiquetado("Nombre completo") {
-                    TextField("Ej: Lucía Paredes", text: $nombre)
-                        .textInputAutocapitalization(.words)
+                    HStack(spacing: 10) {
+                        Image(systemName: "person.text.rectangle").foregroundStyle(.secondary)
+                        TextField("Ej: Lucía Paredes", text: $nombre)
+                            .textInputAutocapitalization(.words)
+                    }
                 }
 
                 // ③ Usuario único, con aviso si ya existe
                 CampoEtiquetado("Usuario", borde: usuarioRepetido ? .red.opacity(0.7) : .clear) {
-                    HStack {
+                    HStack(spacing: 10) {
+                        Image(systemName: "at").foregroundStyle(.secondary)
                         TextField("Ej: lparedes", text: $usuario)
                             .textInputAutocapitalization(.never)
                             .autocorrectionDisabled()
@@ -47,10 +68,10 @@ struct RegistroView: View {
 
                 // ④ Clave (mínimo 6) y su confirmación
                 CampoEtiquetado("Clave (mínimo 6 caracteres)", borde: claveCorta ? .red.opacity(0.7) : .clear) {
-                    SecureField("••••••", text: $clave)
+                    CampoClave(placeholder: "••••••", texto: $clave)
                 }
                 CampoEtiquetado("Confirmar clave", borde: noCoinciden ? .red.opacity(0.7) : .clear) {
-                    SecureField("••••••", text: $confirmacion)
+                    CampoClave(placeholder: "••••••", texto: $confirmacion, icono: "lock.rotation")
                 }
                 if claveCorta {
                     aviso("La clave debe tener al menos 6 caracteres.")
@@ -63,22 +84,24 @@ struct RegistroView: View {
                     .font(.caption2.weight(.semibold))
                     .foregroundStyle(.secondary)
                     .padding(.top, 8)
-                Picker("Rol", selection: $rol) {
-                    ForEach(Rol.allCases) { Text($0.rawValue).tag($0) }
+                HStack(spacing: 12) {
+                    ForEach(Rol.allCases) { opcion in
+                        tarjetaRol(opcion)
+                    }
                 }
-                .pickerStyle(.segmented)
 
                 if let error { aviso(error) }
 
                 // Ⓐ Registrarme
                 Button(action: registrar) {
-                    Text("Registrarme")
+                    Label("Registrarme", systemImage: "person.badge.plus")
                         .fontWeight(.semibold)
                         .frame(maxWidth: .infinity)
-                        .padding(.vertical, 6)
+                        .padding(.vertical, 15)
+                        .foregroundStyle(.white)
+                        .background(LinearGradient.marca, in: RoundedRectangle(cornerRadius: 14, style: .continuous))
+                        .opacity(formularioValido ? 1 : 0.5)
                 }
-                .buttonStyle(.borderedProminent)
-                .controlSize(.large)
                 .disabled(!formularioValido)
                 .padding(.top, 8)
 
@@ -94,6 +117,41 @@ struct RegistroView: View {
         .background(Color(.systemGroupedBackground))
         .navigationTitle("Crear cuenta")              // ① Título; el botón "‹ Ingresar" vuelve al login
         .navigationBarTitleDisplayMode(.inline)
+    }
+
+    /// Tarjeta para elegir el rol (solo visual: cambia la misma variable `rol`)
+    private func tarjetaRol(_ opcion: Rol) -> some View {
+        let elegido = rol == opcion
+        let esSupervisor = opcion == .supervisor
+        return Button {
+            rol = opcion
+        } label: {
+            VStack(alignment: .leading, spacing: 8) {
+                HStack {
+                    Image(systemName: esSupervisor ? "checkmark.shield.fill" : "cart.fill")
+                        .font(.title3)
+                    Spacer()
+                    Image(systemName: elegido ? "checkmark.circle.fill" : "circle")
+                        .foregroundStyle(elegido ? Color.accentColor : Color.secondary)
+                }
+                Text(opcion.rawValue)
+                    .font(.headline)
+                    .foregroundStyle(.primary)
+                Text(esSupervisor ? "Aprueba y paga" : "Registra compras")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+            }
+            .foregroundStyle(elegido ? Color.accentColor : Color.secondary)
+            .padding(14)
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .background(Color(.secondarySystemGroupedBackground), in: RoundedRectangle(cornerRadius: 14, style: .continuous))
+            .overlay(
+                RoundedRectangle(cornerRadius: 14, style: .continuous)
+                    .stroke(elegido ? Color.accentColor : Color(.separator).opacity(0.35), lineWidth: elegido ? 2 : 1)
+            )
+        }
+        .buttonStyle(.plain)
+        .animation(.snappy(duration: 0.2), value: rol)
     }
 
     private func aviso(_ texto: String) -> some View {

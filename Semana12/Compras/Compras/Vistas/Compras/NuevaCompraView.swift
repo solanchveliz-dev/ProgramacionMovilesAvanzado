@@ -38,6 +38,7 @@ struct NuevaCompraView: View {
                 }
             }
             .navigationTitle("Nueva compra")
+            .subtitulo("Registra una compra al proveedor")
             .toolbar {
                 ToolbarItem(placement: .topBarTrailing) { AvatarMenu() }      // ① Avatar de la sesión
             }
@@ -57,24 +58,28 @@ struct NuevaCompraView: View {
         Form {
             // ② Proveedor y ③ Producto
             Section {
-                Picker("Proveedor", selection: $proveedor) {
+                Picker(selection: $proveedor) {
                     Text("Elegir").tag(Proveedor?.none)
                     ForEach(proveedores) { p in
                         Text(p.nombre).tag(Optional(p))
                     }
+                } label: {
+                    EtiquetaFila("Proveedor", icono: "building.2.fill", color: .blue)
                 }
                 .pickerStyle(.navigationLink)
-                Picker("Producto", selection: $producto) {
+                Picker(selection: $producto) {
                     Text("Elegir").tag(Producto?.none)
                     ForEach(productos) { p in
                         Text(p.nombre).tag(Optional(p))
                     }
+                } label: {
+                    EtiquetaFila("Producto", icono: "shippingbox.fill", color: .orange)
                 }
                 .pickerStyle(.navigationLink)
 
                 // ④ Cantidad y costo en recuadros, como en la maqueta
                 HStack {
-                    Text("Cantidad")
+                    EtiquetaFila("Cantidad", icono: "number", color: .teal)
                     Spacer()
                     TextField("0", value: $cantidad, format: .number)
                         .keyboardType(.numberPad)
@@ -85,7 +90,7 @@ struct NuevaCompraView: View {
                         .overlay(RoundedRectangle(cornerRadius: 8).stroke(Color(.separator)))
                 }
                 HStack {
-                    Text("Costo unitario")
+                    EtiquetaFila("Costo unitario", icono: "dollarsign", color: .green)
                     Spacer()
                     TextField("0.00", text: $costoTexto)
                         .keyboardType(.decimalPad)
@@ -95,7 +100,9 @@ struct NuevaCompraView: View {
                         .frame(width: 110)
                         .overlay(RoundedRectangle(cornerRadius: 8).stroke(Color(.separator)))
                 }
-                DatePicker("Fecha de la factura", selection: $fecha, in: ...Date.now, displayedComponents: .date)
+                DatePicker(selection: $fecha, in: ...Date.now, displayedComponents: .date) {
+                    EtiquetaFila("Fecha de la factura", icono: "calendar", color: .red)
+                }
             }
 
             if let producto {
@@ -122,22 +129,38 @@ struct NuevaCompraView: View {
                 }
                 .pickerStyle(.segmented)
                 if alCredito {
-                    LabeledContent("Vence el", value: ReglasCompra.fechaVencimiento(desde: fecha, alCredito: true).corta)
+                    LabeledContent {
+                        Text(ReglasCompra.fechaVencimiento(desde: fecha, alCredito: true).corta)
+                    } label: {
+                        EtiquetaFila("Vence el", icono: "clock.badge.exclamationmark", color: .purple)
+                    }
                 }
             }
 
             // Resumen calculado
             if let calculo {
                 Section("Resumen") {
-                    LabeledContent("Subtotal", value: calculo.subtotal.soles)
-                    LabeledContent("IGV 18 %", value: calculo.igv.soles)
+                    LabeledContent {
+                        Text(calculo.subtotal.soles).monospacedDigit()
+                    } label: {
+                        EtiquetaFila("Subtotal", icono: "list.bullet.rectangle", color: .gray)
+                    }
+                    LabeledContent {
+                        Text(calculo.igv.soles).monospacedDigit()
+                    } label: {
+                        EtiquetaFila("IGV 18 %", icono: "percent", color: .gray)
+                    }
                     LabeledContent {
                         Text(calculo.total.soles)
                             .font(.title3.bold())
                             .monospacedDigit()
                             .foregroundStyle(.primary)
                     } label: {
-                        Text("Total").font(.headline)
+                        Label {
+                            Text("Total").font(.headline)
+                        } icon: {
+                            IconoFila(nombre: "sum", color: .marca)
+                        }
                     }
                 }
 
@@ -169,7 +192,7 @@ struct NuevaCompraView: View {
                         .padding(.vertical, 6)
                 }
                 .buttonStyle(.borderedProminent)
-                .tint(requiereAprobacion ? .orange : .indigo)
+                .tint(requiereAprobacion ? .orange : .marca)
                 .disabled(!formularioValido)
             } footer: {
                 Text("Registrada por \(sesion.usuario?.nombre ?? "—")")
