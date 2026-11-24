@@ -1,14 +1,13 @@
-//
-//  Lab14IntroFirebaseApp.swift
-//  Lab14IntroFirebase
-//
-//  Created by Naomi Solanch Veliz Pie on 24/11/26.
-//
-
 import SwiftUI
+import FirebaseCore
 
 @main
 struct Lab14IntroFirebaseApp: App {
+    // Configure Firebase when app starts
+    init() {
+        FirebaseApp.configure()
+    }
+
     var body: some Scene {
         WindowGroup {
             ContentView()
