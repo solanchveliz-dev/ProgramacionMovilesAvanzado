@@ -4,6 +4,7 @@
 //
 
 import Foundation
+import Combine
 
 // ViewModel para manejar la lógica de red y los datos de usuarios
 class UserViewModel: ObservableObject {
