@@ -10,6 +10,18 @@ class UserViewModel: ObservableObject {
 
     // Publica una lista de usuarios para que la vista se actualice automáticamente cuando cambie
     @Published var users: [User] = []
+    @Published var searchText: String = ""        // Texto del filtro
+
+    // Lista filtrada según el texto de búsqueda (sin distinguir mayúsculas/minúsculas)
+    var filteredUsers: [User] {
+        if searchText.isEmpty {
+            return users
+        } else {
+            return users.filter { user in
+                user.name.lowercased().contains(searchText.lowercased())
+            }
+        }
+    }
 
     // Función que obtiene los usuarios desde una API externa
     func fetchUsers() {
