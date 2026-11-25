@@ -50,7 +50,9 @@ struct ContentView: View {
                     .padding(.vertical, 4)
                     .swipeActions {
                         Button(role: .destructive) {
-                            viewModel.deleteUser(id: user.id)
+                            Task {
+                                await viewModel.deleteUser(id: user.id)
+                            }
                         } label: {
                             Label("Eliminar", systemImage: "trash")
                         }
@@ -83,17 +85,23 @@ struct ContentView: View {
             }
             .navigationTitle("Usuarios")
             .onAppear {
-                viewModel.fetchUsers()
+                Task {
+                    await viewModel.fetchUsers()
+                }
             }
             .sheet(isPresented: $showingForm) {
                 if let user = editingUser {
                     UserFormView(name: user.name, email: user.email, isEditing: true) { name, email in
                         let updated = User(id: user.id, name: name, email: email)
-                        viewModel.updateUser(user: updated)
+                        Task {
+                            await viewModel.updateUser(user: updated)
+                        }
                     }
                 } else {
                     UserFormView(name: "", email: "", isEditing: false) { name, email in
-                        viewModel.createUser(name: name, email: email)
+                        Task {
+                            await viewModel.createUser(name: name, email: email)
+                        }
                     }
                 }
             }
